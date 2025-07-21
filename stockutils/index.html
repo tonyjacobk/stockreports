@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Research Reports</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Section - Title */
+        .header {
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.8em;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Middle Section - Tabs + Table */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .vertical-tabs {
+            width: 200px;
+            background-color: #fafafa;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .vertical-tabs button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #e7e7e7;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .vertical-tabs button:hover {
+            background-color: #ddd;
+        }
+
+        .table-container {
+            flex: 1;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Bottom Section - Pagination */
+        .footer {
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .pagination a {
+            margin: 0 8px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        .pagination a:hover {
+            text-decoration: underline;
+        }
+
+        .pagination span {
+            margin: 0 8px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/styles/my.css">
+</head>
+<body>
+    <!-- Top Section -->
+    <div class="header">
+        Recent Research Reports
+    </div>
+ <script>
+ history.replaceState(null, "", "/");
+ </script>
+    <!-- Middle Section -->
+    <div class="content">
+        <!-- Vertical Tabs -->
+        <div class="vertical-tabs">
+            <button>All</button>
+            <button>Buy</button>
+            <button>Sell</button>
+            <button>Neutral</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+	    <tr>
+		    <th>Report Date</th>
+                    <th>Company</th>
+                    <th>Broker</th>
+                    <th>Recommendation</th>
+                    <th>Target</th>
+                    <th>URL</th>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Wipro</td>
+		    <td>
+		    <a href="/brk/Deven%2520Choksey">
+            Deven Choksey
+		    </a> </td> 
+                    <td>Accumulate</td>
+                    <td>279.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718051901_Wipro-18072025-deven.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Wipro</td>
+		    <td>
+		    <a href="/brk/Emkay%2520Global%2520Financial">
+            Emkay Global Financial
+		    </a> </td> 
+                    <td>Reduce</td>
+                    <td>280.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718064307_Wipro-18072025-emkay.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Axis Bank</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>1375.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718060434_Axis-Bank-18072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>LTIMindtree</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>5340.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718052707_LTIMindtree-18072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Clean Science and Technology</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>1425.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718054601_Clean-Science-and-Technology-18072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Wipro</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>260.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718053625_Wipro-18072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-18	
+                    <td>Jupiter Life Line Hospitals Ltd</td>
+		    <td>
+		    <a href="/brk/Share%2520india">
+            Share india
+		    </a> </td> 
+                    <td></td>
+                    <td>0.00</td>
+                    <td>
+                        <a href="https://www.shareindia.com/wp-content/uploads/data/uploads/Research_Files/Jupiter_Life_Line_Hospitals_Ltd_2025_07_18_50.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-17	
+                    <td>AWL Agri Business</td>
+		    <td>
+		    <a href="/brk/Deven%2520Choksey">
+            Deven Choksey
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>265.00</td>
+                    <td>
+                        <a href="https://www.moneycontrol.com/news/business/stocks/hold-awl-agri-business-target-of-rs-265-deven-choksey-13293542.html" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-17	
+                    <td>Tech Mahindra</td>
+		    <td>
+		    <a href="/brk/Emkay%2520Global%2520Financial">
+            Emkay Global Financial
+		    </a> </td> 
+                    <td>Reduce</td>
+                    <td>1600.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250717053815_Tech-Mahindra-17072025-emkay.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-17	
+                    <td>Larsen and Toubro Technology</td>
+		    <td>
+		    <a href="/brk/Motilal%2520Oswal">
+            Motilal Oswal
+		    </a> </td> 
+                    <td>Neutral</td>
+                    <td>4300.00</td>
+                    <td>
+                        <a href="https://www.moneycontrol.com/news/business/stocks/neutral-larsen-and-toubro-technology-target-of-rs-4300-motilal-oswal-13288787.html" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-17	
+                    <td>HDFC Asset Management Company</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>5700.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250718071300_HDFC-Asset-Management-Company-18072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-17	
+                    <td>Larsen and Toubro Technology Services</td>
+		    <td>
+		    <a href="/brk/Prabhudas%2520Lilladher">
+            Prabhudas Lilladher
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>4250.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250717054954_Larsen-and-Toubro-Technology-Services-17072025-prabhu.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>AWL Agri Business</td>
+		    <td>
+		    <a href="/brk/ICICI%2520Direct">
+            ICICI Direct
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>360.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250716055116_AWL-Agri-Business-6072025-icici.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Just Dial</td>
+		    <td>
+		    <a href="/brk/ICICI%2520Direct">
+            ICICI Direct
+		    </a> </td> 
+                    <td>Hold</td>
+                    <td>968.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250716061855_Just-Dial-6072025-icici.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Vishal Mega Mart</td>
+		    <td>
+		    <a href="/brk/Motilal%2520Oswal">
+            Motilal Oswal
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>165.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250716064535_Vishal-Mega-Mart-6072025-moti.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>JSW Steel</td>
+		    <td>
+		    <a href="/brk/Motilal%2520Oswal">
+            Motilal Oswal
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>1180.00</td>
+                    <td>
+                        <a href="https://images.moneycontrol.com/static-mcnews/2025/07/20250717034141_JSW-Steel-17072025-moti.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Tech Mahindra</td>
+		    <td>
+		    <a href="/brk/Motilal%2520Oswal">
+            Motilal Oswal
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>2000.00</td>
+                    <td>
+                        <a href="https://www.moneycontrol.com/news/business/stocks/buy-tech-mahindra-target-of-rs-2000-motilal-oswal-13288695.html" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Waaree Energies Ltd</td>
+		    <td>
+		    <a href="/brk/Share%2520india">
+            Share india
+		    </a> </td> 
+                    <td></td>
+                    <td>0.00</td>
+                    <td>
+                        <a href="https://www.shareindia.com/wp-content/uploads/data/uploads/Research_Files/Waaree_Energies_Ltd_2025_07_16_43.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Pearl Global Industries Ltd</td>
+		    <td>
+		    <a href="/brk/Share%2520india">
+            Share india
+		    </a> </td> 
+                    <td></td>
+                    <td>0.00</td>
+                    <td>
+                        <a href="https://www.shareindia.com/wp-content/uploads/data/uploads/Research_Files/Pearl_Global_Industries_Ltd_2025_07_16_45.pdf" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+                <tr>
+		    <td>2025-07-16	
+                    <td>Tech Mahindra</td>
+		    <td>
+		    <a href="/brk/Sharekhan">
+            Sharekhan
+		    </a> </td> 
+                    <td>Buy</td>
+                    <td>1950.00</td>
+                    <td>
+                        <a href="https://www.moneycontrol.com/news/business/stocks/buy-tech-mahindra-target-of-rs-1950-sharekhan-3-13293631.html" target="_blank">
+                            <img src="/static/icon.png" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                
+            </table>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer">
+        <div class="pagination">
+    
+            
+            <span>Page 1 of 7</span>
+            
+                <a href="/2">Next</a>
+            
+      	    
+        </div>
+    </div>
+</body>
+</html>

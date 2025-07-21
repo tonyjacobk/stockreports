@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Research Reports</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Section - Title */
+        .header {
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.8em;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Middle Section - Tabs + Table */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .vertical-tabs {
+            width: 200px;
+            background-color: #fafafa;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .vertical-tabs button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #e7e7e7;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .vertical-tabs button:hover {
+            background-color: #ddd;
+        }
+
+        .table-container {
+            flex: 1;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Bottom Section - Pagination */
+        .footer {
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .pagination a {
+            margin: 0 8px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        .pagination a:hover {
+            text-decoration: underline;
+        }
+
+        .pagination span {
+            margin: 0 8px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/my.css') }}">
+</head>
+<body>
+    <!-- Top Section -->
+    <div class="header">
+        Recent Research Reports
+    </div>
+ <script>
+ history.replaceState(null, "", "/");
+ </script>
+    <!-- Middle Section -->
+    <div class="content">
+        <!-- Vertical Tabs -->
+        <div class="vertical-tabs">
+            <button>All</button>
+            <button>Buy</button>
+            <button>Sell</button>
+            <button>Neutral</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+	    <tr>
+		    <th>Report Date</th>
+                    <th>Company</th>
+                    <th>Broker</th>
+                    <th>Recommendation</th>
+                    <th>Target</th>
+                    <th>URL</th>
+                </tr>
+                {% for row in data %}
+                <tr>
+		    <td>{{ row['report_date'] }}	
+                    <td>{{ row['company'] }}</td>
+		    <td>
+		    <a href="{{ url_for('search_broker',brok =row['broker']|urlencode) }}">
+            {{ row['broker'] }}
+		    </a> </td> 
+                    <td>{{ row['recommendation'] }}</td>
+                    <td>{{ row['target'] }}</td>
+                    <td>
+                        <a href="{{ row['URL'] }}" target="_blank">
+                            <img src="{{ url_for('static', filename='icon.png') }}" alt="URL Icon" width="20">
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer">
+        <div class="pagination">
+    {% if broker is defined %}
+
+            {% if page > 1 %}
+               <a href="{{ url_for('search_broker',brok =broker|urlencode, page=page-1) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('search_broker', brok =broker|urlencode,page=page+1) }}">Next</a>
+            {% endif %}
+
+    {% else %}
+            {% if page > 1 %}
+                <a href="{{ url_for('index', page=page-1) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('index', page=page+1) }}">Next</a>
+            {% endif %}
+      {% endif %}	    
+        </div>
+    </div>
+</body>
+</html>
+
