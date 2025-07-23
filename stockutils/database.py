@@ -53,7 +53,6 @@ def check_if_present(table):
   logger.info("\nTrying to add %s",i)
   try: 
    report_date_str = i['report-date'].rstrip('.') # Remove trailing dot
-   print(i)
    try:
     datetime_object1 = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
     datetime_object = datetime.strptime(datetime_object1, "%Y-%m-%d").date()
@@ -62,31 +61,27 @@ def check_if_present(table):
      continue
    c= aiven.row_exists_no_comp(i["broker"],i["recommendation"],i["target"])
    if not c:
-       print("Not in Db")
+       logger.info("Not in Db. Adding")
        tobeadded.append(i)
        continue
+   mustbeadded=True
    for entry in c:
-    logger.info("found in DB %s",i)
-    print(datetime_object,entry["report_date"])
+    logger.info("found in DB %s",entry)
 
     diff= abs(datetime_object-entry["report_date"]).days
-    print(diff)
-    print(datetime_object,entry["report_date"])
     if diff <5:  ## May be same entry as in DB , must check the company name 
-     logger.info("Not adding as rows are same  ")
-     logger.info ("from Page %s",i)
-     logger.info(" from DB  %s",entry)
-    else:
-      tobeadded.append(i)
-      continue
-    if  compare_strings(i["Company"],entry["company"]): #name is same ,need not be added
-     logger.info("Not adding as rows are same  \n")
-     logger.info ("from Page ",i)
-     logger.info("\n from DB ",entry)
+     logger.info("Report with same broker, recomm and target , must check name  ")
+     if  compare_strings(i["Company"],entry["company"]):
+      logger.info("Not adding as rows are same  \n")
+      logger.info ("from Page ",i)
+      logger.info("\n from DB ",entry)
+      mustbeadded=False
+      break      
+   if mustbeadded:
+    logger.info("Adding this .... ")
+    tobeadded.append(i)
  
-    else:
-      tobeadded.append(i)
   except Exception as e:
-      logger.error  ("check if present :Error with ",str(e))
+      logger.error("check if present :Error with ",str(e))
  return(tobeadded) 
 

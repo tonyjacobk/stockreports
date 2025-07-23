@@ -1,2 +1,2 @@
-cd /home/ubuntu/stocks
-python3 main.py
+cd /home/ubuntu/stockreports
+/home/ubuntu/.venv/bin/python3 main.py
