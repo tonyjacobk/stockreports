@@ -1,3 +1,7 @@
+import contvar
+import logging
+logger = logging.getLogger(__name__)
+
 def read_first_line(filename):
     try:
         with open(filename, 'r') as file:
@@ -9,6 +13,9 @@ def read_first_line(filename):
         return f"An error occurred: {e}"
 
 def write_first_line(filename, text):
+    if contvar.testruncn==1:
+        logger.info("testruncn=1,Not saving ..")
+        return
     try:
         with open(filename, 'w') as file:
             file.write(text + '\n')

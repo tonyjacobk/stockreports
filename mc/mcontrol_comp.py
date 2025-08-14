@@ -71,7 +71,6 @@ def get_real_url(url):
   soup = get_moneycontrol_article_content(url)
   nurl=None
   if soup:
-    logger.info("Successfully parsed the page %s . ",url)
     nurl= get_pdf(soup) 
   else:
     logger.error("Failed to get or parse the webpage. %s",url)

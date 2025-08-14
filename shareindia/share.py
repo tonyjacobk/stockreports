@@ -2,15 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from stockutils import read_first_line,write_first_line
-from stockutils import print_table,insert_into_database
+from stockutils import print_table,db
 import logging 
 logger = logging.getLogger(__name__)
 
 reponse=''
-ldate="30-6-2025"
-print (ldate)
-lastdate=datetime.strptime(ldate, "%d-%m-%Y")
-nlastdate=lastdate
 reps=[]
 def read_page():
     global response
@@ -71,27 +67,34 @@ def get_reports(lastdate,ids,reps):
             found_first=True
     return(tlastdate)
 # Call the function
-def share_main():
+def ishare_main():
 
- global nlastdate,ldate,lastdate
- print ("Before ..",ldate)
- ldate=read_first_line("./cntrfiles/shareindia.txt").strip()
- print ("Inside ",ldate)
+ logger.info("Logging Start ... ShareIndia")
+ ldate_string=read_first_line("./cntrfiles/shareindia.txt").strip()
 
- lastdate=datetime.strptime(ldate, "%Y-%m-%d")
+ lastdate=datetime.strptime(ldate_string, "%Y-%m-%d")
+ nlastdate=lastdate
  print ("Inside ",lastdate)
  read_page()
  for i in ['tab-content-long-term-stock','tab-content-short-term-stock','tab-content-thematic-stocks','tab-content-special-reports']:
+  nlast_date=None
   nlast_date=get_reports(lastdate,i,reps)
-  print ("after ",i)
-  print(reps)
+  logger.info ("after %s ",i)
+  logger.info(reps)
   if nlast_date:
     nl=datetime.strptime(nlast_date,"%B %d, %Y")
     nlastdate= nl if nl>nlastdate else nlastdate
  write_first_line('./cntrfiles/shareindia.txt', nlastdate.strftime('%Y-%m-%d')) 
  logger.info("Final list of reports from ShareIndia %s",len(reps))
  print_table(reps,logger)
- insert_into_database(reps,"shareindia")
+ db.insert_into_database(reps,"shareindia")
+ nlast_string=datetime.strftime(nlastdate,"%Y-%m-%d")
+ write_first_line("./cntrfiles/shareindia.txt",nlast_string)
  return (reps)
 
-
+def share_main():
+ try:
+   return( ishare_main())
+ except Exception as e:
+   logger.error ("ShareIndia issue {e}")
+  
