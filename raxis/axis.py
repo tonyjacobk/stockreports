@@ -110,7 +110,7 @@ def extract_target_price(text):
         if match:
             price = match.group(1)
             # Return as integer if it's a whole number, otherwise as float
-            return int(float(price)) if float(price).is_integer() else float(price)
+            return price
     
     return ""
 
