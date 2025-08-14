@@ -13,6 +13,17 @@ def download_file(url):
  except requests.exceptions.RequestException as e:
        raise e 
   
+def find_rating_from_file():
+ reader = PdfReader("tempfile")
+ page = reader.pages[0]  # Access the first page
+ text = page.extract_text()
+
+ match = re.search(r'Rating:\s*(\w+)', text)
+
+    # Return the matched word if found, otherwise return None
+ return match.group(1) if match else None
+
+
 
 def get_target_price_from_file():
  reader = PdfReader("tempfile")
@@ -52,5 +63,27 @@ def get_target_price(url):
   pass
  return (value)
 
-p=get_target_price("https://hello.com")
-print(p)
+def get_recommendation(url):
+ value=" "
+ try:
+  download_file(url)
+  value=find_rating_from_file()
+ except Exception as e:
+  pass
+ return (value)
+
+def get_recomm_and_target(url):
+ print(url)
+ value=" "
+ recomm=" "
+ try:
+  download_file(url)
+  recomm=find_rating_from_file()
+  value=get_target_price_from_file()
+  print ("recommendation ",recomm," Target ",value)
+ except Exception as e:
+  print("Could not get from :",url)
+  print(str(e))
+ print (value,recomm)
+ return value ,recomm
+

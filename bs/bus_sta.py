@@ -3,8 +3,9 @@ import ast
 import json
 from datetime import datetime
 from collections import Counter
-from stockutils import row_exists_no_comp,insert_into_database
-from stockutils import check_if_present,normalize_broker_name,print_table,read_first_line
+#from stockutils import row_exists_no_comp,insert_into_database
+from stockutils import db
+from stockutils import check_if_present,normalize_broker_name,print_table,read_first_line,write_first_line
 import logging
 logger = logging.getLogger(__name__)
 
@@ -111,14 +112,17 @@ def find_new_reports(start_date):
  return (new_start_date)
 
 def main_bs():
- start_date_stri=read_first_line("./cntrfiles/bs.txt").strip()
- logger.info ("BS: Searching for reports newer than %s ",start_date_stri)
- start_date= datetime.strptime(start_date_stri,"%B %d, %Y")
- new_start_date=find_new_reports(start_date)
- logger.info("New reports found from BS before checking with DB")
- print_table(recent_table,logger)
- cdets=check_if_present(recent_table)
- logger.info("BS: Reports to be added to DB")
- print_table(cdets,logger)
-# insert_into_database(u,"bs")
-
+ try:
+  start_date_stri=read_first_line("./cntrfiles/bs.txt").strip()
+  logger.info ("BS: Searching for reports newer than %s ",start_date_stri)
+  start_date= datetime.strptime(start_date_stri,"%B %d, %Y")
+  new_start_date=find_new_reports(start_date)
+  logger.info("%s New reports found from BS before checking with DB",len(recent_table))
+  print_table(recent_table,logger)
+  cdets=check_if_present(recent_table)
+  logger.info(" %s BS: Reports to be added to DB",len(cdets))
+  print_table(cdets,logger)
+  db.insert_into_database(cdets,"bs")
+  write_first_line("./cntrfiles/bs.txt",new_start_date)
+ except Exception as e:
+  logger.error(f"BS: had issues  {e}")

@@ -1,5 +1,8 @@
 import requests
 import json
+import contvar
+import logging
+logger = logging.getLogger(__name__)
 
 url='https://www.business-standard.com/markets/research-report'
 username = 'tonyjacobk'
@@ -19,6 +22,10 @@ headers = {
     'Content-Type': "application/json"
 }
 def scrape_bs():
+ if contvar.testrunbs ==1:
+     logger.info ("testrunbs=1 , Reurning ..")
+     return 
+ print("testrunbs=0 .Continuing ... ")
  response = requests.request("POST", apiUrl, data=payload, auth=(username,apiKey), headers=headers)
 
  with open("bs.txt", "w") as file:
