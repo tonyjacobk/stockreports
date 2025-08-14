@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 import pytz
 from .sutils import read_first_line , write_first_line
-from stockutils import insert_into_database
+from stockutils import db,print_table
 from stockutils import check_if_present
 from .mcontrol_comp import get_real_url
 import logging
@@ -110,13 +110,18 @@ def scrape_money_control(saved_time):
     logger.error("Failed to fetch page. Status: %s", response.status_code)
 
 # Print all JSONs
- logger.info ("After Scrapping  %s \n",json.dumps(results, indent=2))
+ logger.info ("MC: After Scrapping  %s \n",json.dumps(results, indent=2))
  return results
 
 def main_mc():
- start_date=read_first_line("./cntrfiles/mcontrol.txt").strip()
- logger.info ("Searching for reports newer than %s ",start_date)
- dets=scrape_money_control(start_date)
- cdets=check_if_present(dets)
- logger.info  ("Final list of MC reports for DB %s ",cdets)
- insert_into_database(cdets,"mc")
+ try:
+  start_date=read_first_line("./cntrfiles/mcontrol.txt").strip()
+  logger.info ("MC:Searching for reports newer than %s ",start_date)
+  dets=scrape_money_control(start_date)
+  logger.info("MC:Found %s new reports",len(dets))
+  cdets=check_if_present(dets)
+  logger.info  ("MC: Found %s reports for adding to db",len(cdets))
+  print_table(cdets,logger)
+  db.insert_into_database(cdets,"mc")
+ except Exception as e:
+  logger.error(f"MC had issues {e}")

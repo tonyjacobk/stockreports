@@ -1,9 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import datetime
-from stockutils import read_first_line,write_first_line
-from stockutils import print_table,insert_into_database
+from stockutils import read_first_line,write_first_line,get_target_price,get_recomm_and_target
+from stockutils import print_table,db
 import logging
+import urllib.parse
 logger = logging.getLogger(__name__)
 
 smifs_results=[]
@@ -50,19 +51,18 @@ def get_ic(subsec):
         return None
 
 def parse_research_data(lastdate,recomm,subsec):
-    found=False
     # Get the API response
     data = get_ic(subsec)
     if not data:
         logger.error ("No data received from SMIFS API %s",subsec)
-        return [],lastdate
+        return lastdate
 
     # Assuming the HTML content is in a key like 'd' in the JSON response
     html_content = data.get('d', '')  # Adjust key if needed
 
     if not html_content:
        logger.error("No HTML content found in response")
-       return [],lastdate
+       return lastdate
 
     # Parse HTML with BeautifulSoup
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -71,11 +71,12 @@ def parse_research_data(lastdate,recomm,subsec):
     columns = soup.find_all('div', class_='col-md-3 col-sm-4')
     if not columns:
        logger.error("No elements with class='col-md-3 col-sm-4' found for %s",subsec)
-       return [],lastdate
+       return lastdate
 
     # List to store smifs_results
 
     # Iterate through each column and extract required information
+    found=False
     for col in columns:
         result = {
             "Company": "",
@@ -111,23 +112,31 @@ def parse_research_data(lastdate,recomm,subsec):
                 result["Company"] = p_parts[0].strip()
                 # Join remaining parts for recommendation
                 result["recommendation"] = recomm
-
+        if subsec in ["icr","result"]:
+            print(subsec)
+            result["target"], result["recommendation"]=get_recomm_and_target((result["link"]))
         smifs_results.append(result)
-    nlastdate=datetime.datetime.strptime(smifs_results[0]["report-date"],"%B %d, %Y")
-    return smifs_results,nlastdate
+        found=True
+    nlastdate=lastdate
+    if found:
+      nlastdate=datetime.datetime.strptime(smifs_results[0]["report-date"],"%B %d, %Y").date()
+    return nlastdate
 def smifs_main():
+   try:  
     logger.info("Logging Start ... SMIFS")
     ldate_string=read_first_line("./cntrfiles/smifs.txt").strip()
     oldate=datetime.datetime.strptime(ldate_string, "%B %d, %Y").date()
-    smifs_results,nldate1 = parse_research_data(oldate,"","result")
+    nldate1 = parse_research_data(oldate,"","result")
     logger.info("New reports after checking results tab")
     print_table(smifs_results,logger)
-    smifs_results,nldate2 = parse_research_data(oldate,"Initiating Coverage","icr")
+    nldate2 = parse_research_data(oldate,"Initiating Coverage","icr")
     logger.info("New reports after checking  Initiating Coverage tab")
     print_table(smifs_results,logger)
-    smifs_results,nldate3 = parse_research_data(oldate,"Pick of Month","pickmonth")
+    nldate3 = parse_research_data(oldate,"Pick of Month","pickmonth")
     logger.info("New reports after checking  Pick of Month tab")
     print_table(smifs_results,logger)
     latest=max([nldate1,nldate2,nldate3])
-    insert_into_database(smifs_results,"smifs")
+    db.insert_into_database(smifs_results,"smifs")
     write_first_line('./cntrfiles/smifs.txt', latest.strftime("%B %d, %Y"))
+   except Exception as e:
+     logger.error(f"SMIFS issue {e}")
