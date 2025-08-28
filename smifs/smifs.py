@@ -123,18 +123,23 @@ def parse_research_data(lastdate,recomm,subsec):
     return nlastdate
 def smifs_main():
    try:  
-    logger.info("Logging Start ... SMIFS")
+    logger.info("\nLogging Start ... SMIFS")
     ldate_string=read_first_line("./cntrfiles/smifs.txt").strip()
     oldate=datetime.datetime.strptime(ldate_string, "%B %d, %Y").date()
-    nldate1 = parse_research_data(oldate,"","result")
-    logger.info("New reports after checking results tab")
-    print_table(smifs_results,logger)
+    logger.info("Mail: SMIFS Checking for reports newer than %s",ldate_string)
     nldate2 = parse_research_data(oldate,"Initiating Coverage","icr")
-    logger.info("New reports after checking  Initiating Coverage tab")
+    logger.info("\nNew reports after checking  Initiating Coverage tab\n")
+    logger.info("Mail: SMIFS Found %s new reports after Initiating Coverage",len(smifs_results))
     print_table(smifs_results,logger)
     nldate3 = parse_research_data(oldate,"Pick of Month","pickmonth")
     logger.info("New reports after checking  Pick of Month tab")
+    logger.info("Mail: SMIFS Found %s new reports after Pick of Month",len(smifs_results))
     print_table(smifs_results,logger)
+    nldate1 = parse_research_data(oldate,"","result")
+    logger.info("New reports after checking results tab\n")
+    logger.info("Mail: SMIFS Found %s new reports after Results",len(smifs_results))
+    print_table(smifs_results,logger)
+
     latest=max([nldate1,nldate2,nldate3])
     db.insert_into_database(smifs_results,"smifs")
     write_first_line('./cntrfiles/smifs.txt', latest.strftime("%B %d, %Y"))

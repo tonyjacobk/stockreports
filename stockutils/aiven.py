@@ -1,5 +1,5 @@
 import pymysql
-from datetime import datetime
+from datetime import datetime,date
 import logging
 import contvar
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class DBClient:
     """
 
     self.cursor.execute(query, (broker,company,date))
-    result = cursor.fetchone()
+    result = self.cursor.fetchone()
 
  def row_exists_no_comp(self,broker,recom,target):
     found=[]
@@ -53,7 +53,7 @@ class DBClient:
             WHERE  recommendation = %s AND broker =%s AND target = %s
     """
     self.cursor.execute(query, (recom,broker,target))
-    for row in cursor:
+    for row in self.cursor:
      found.append(row)
     return (found)  
 
@@ -96,9 +96,13 @@ class DBClient:
    mysql_data_str=""  
    for data in data_list:
  # Convert report date to MySQL date format
-    report_date_str = data['report-date'].rstrip('.') # Remove trailing dot
+    if isinstance(data['report-date'],date):
+         mysql_date_str=data['report-date'].strftime("%Y-%m-%d")
+    else:
+     report_date_str = data['report-date'].rstrip('.') # Remove trailing dot
 # Convert to MySQL date format (YYYY-MM-DD)
-    mysql_date_str = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
+     mysql_date_str = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
+
     realname,code=get_comp_code( data['Company'])
  # Prepare data for insertion
     insert_data = (

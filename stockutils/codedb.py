@@ -65,7 +65,7 @@ class CodeClient:
 
 
   except pymysql.connect.Error as err:
-    logger.error("Could not add this report %s",data)
+    logger.error("Could not add this to database %s %s",comp_name,code)
     logger.error("Something went wrong: %s",str(err))
 
  def create_dictionary(self):
