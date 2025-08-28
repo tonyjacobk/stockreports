@@ -8,11 +8,11 @@ from shareindia import share_main
 from smifs import smifs_main
 import logging
 logger = logging.getLogger(__name__)
-#reports=["smifs","mc","bs","share"]
-reports=["smifs"]
+reports=["smifs","mc","bs","share"]
+#reports=["mc"]
 
 def initialize_logger ():
-    logging.basicConfig(filename='/tmp/myapp.log', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename='/tmp/myapp.log', level=logging.INFO)
     logger.info('Started Logging from main ')
 def add():
   initialize_logger()

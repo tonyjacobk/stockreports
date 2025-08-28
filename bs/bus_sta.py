@@ -114,13 +114,13 @@ def find_new_reports(start_date):
 def main_bs():
  try:
   start_date_stri=read_first_line("./cntrfiles/bs.txt").strip()
-  logger.info ("BS: Searching for reports newer than %s ",start_date_stri)
+  logger.info ("Mail: BS Searching for reports newer than %s ",start_date_stri)
   start_date= datetime.strptime(start_date_stri,"%B %d, %Y")
   new_start_date=find_new_reports(start_date)
-  logger.info("%s New reports found from BS before checking with DB",len(recent_table))
+  logger.info("Mail: BS Found %s new reports after scrapping",len(recent_table))
   print_table(recent_table,logger)
   cdets=check_if_present(recent_table)
-  logger.info(" %s BS: Reports to be added to DB",len(cdets))
+  logger.info("Mail: BS Found %s reports for adding to db",len(cdets))
   print_table(cdets,logger)
   db.insert_into_database(cdets,"bs")
   write_first_line("./cntrfiles/bs.txt",new_start_date)

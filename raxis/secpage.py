@@ -3,15 +3,10 @@ import json # To pretty-print JSON response if applicable
 from typing import List, Union
 from .axis import extract_report_information,transform_data
 from datetime import datetime
-from stockutils import read_first_line,write_first_line
-from stockutils import print_table,insert_into_database
+from stockutils import get_last_report_date,update_last_report_date
+from stockutils import print_table,db
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 
 def fetch_axisdirect_reports(
@@ -132,19 +127,21 @@ def axis_main():
  lastfound=False
  reports=[]
  ids=[]
- ldate_string=read_first_line("./cntrfiles/axis.txt").strip()
- lastdate=datetime.strptime(ldate_string,  "%B %d, %Y") 
+ lastdate= get_last_report_date("Axis")
  while not lastfound:
   try:
     k=fetch_axisdirect_reports(ids,len(ids)) 
   except Exception as e:
-    logging.error("Issue with Json format. Exiting .. . Will add already found reports")
+    logging.error("Axis :Issue with Json format. Exiting .. . Will add already found reports")
     break
   results,ids=extract_report_information(k,ids)
+  logger.info("Mail: Axis found %s reports in this round",len(results))
   reps,lastfound=transform_data(lastdate,results)
+  logger.info("Mail: Axis found %s valid reports in this round",len(reps))
   reports.extend(reps)
  print_table(reports,logger)
- insert_into_database(reports,"axis")
+ logger.info("Mail: Axis Found %s reports ",len(reports))
+ db.insert_into_database(reports,"axis")
  if len(reports) >0:
-  write_first_line('./cntrfiles/axis.txt',reports[0]["report-date"] )
+  update_last_report_date("Axis",,reports[0]["report-date"])
  print(reports)

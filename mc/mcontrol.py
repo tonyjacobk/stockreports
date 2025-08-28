@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 # Function to parse the title
 def parse_recommendation(title):
     try:
+        parts=title.split(';')
         recommendation = title.split()[0]
-        company = title.split(";")[0].split(" ", 1)[1].strip()
+        if len(parts) ==1:
+            company= title.split(":")[0].split(" ", 1)[1].strip()
+        else:
+             company = title.split(";")[0].split(" ", 1)[1].strip()
         target_match = re.search(r"target of Rs (\d+)", title)
         target = int(target_match.group(1)) if target_match else None
         broker = title.split(":")[-1].strip()
@@ -43,7 +47,6 @@ def find_published_time(elem):
             span_match = re.search(r"<span>(.*?)</span>", comment)
             if span_match:
                 published_time = span_match.group(1).strip()
-                logger.info ("Published Time: %s", published_time)
             else:
                 logger.error("Span element not found .. Not able to find published time")
   else:
@@ -95,6 +98,9 @@ def scrape_money_control(saved_time):
         # Find the first <a>
         link_tag = elem.find("a")
         href = link_tag['href'] if link_tag and link_tag.has_attr('href') else None
+        if 'moneycontrol-research' in href:
+            logger.info("Mail:MC Research %s ",text)
+            continue
         title = link_tag['title'] if link_tag and link_tag.has_attr('title') else None
         rurl=get_real_url(href)
         tjson = parse_recommendation(title) if title else {}
@@ -116,11 +122,11 @@ def scrape_money_control(saved_time):
 def main_mc():
  try:
   start_date=read_first_line("./cntrfiles/mcontrol.txt").strip()
-  logger.info ("MC:Searching for reports newer than %s ",start_date)
+  logger.info ("Mail: MC Searching for reports newer than %s ",start_date)
   dets=scrape_money_control(start_date)
-  logger.info("MC:Found %s new reports",len(dets))
+  logger.info("Mail: MC Found %s new reports after scrapping",len(dets))
   cdets=check_if_present(dets)
-  logger.info  ("MC: Found %s reports for adding to db",len(cdets))
+  logger.info  ("Mail: MC Found %s reports for adding to db",len(cdets))
   print_table(cdets,logger)
   db.insert_into_database(cdets,"mc")
  except Exception as e:

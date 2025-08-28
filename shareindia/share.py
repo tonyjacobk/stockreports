@@ -71,7 +71,7 @@ def ishare_main():
 
  logger.info("Logging Start ... ShareIndia")
  ldate_string=read_first_line("./cntrfiles/shareindia.txt").strip()
-
+ logger.info("Mail: ShareIndia Searching for reports newer than %s",ldate_string)
  lastdate=datetime.strptime(ldate_string, "%Y-%m-%d")
  nlastdate=lastdate
  print ("Inside ",lastdate)
@@ -79,7 +79,7 @@ def ishare_main():
  for i in ['tab-content-long-term-stock','tab-content-short-term-stock','tab-content-thematic-stocks','tab-content-special-reports']:
   nlast_date=None
   nlast_date=get_reports(lastdate,i,reps)
-  logger.info ("after %s ",i)
+  logger.info ("Mail: Shareindia After %s total new reports %s",i,len(reps))
   logger.info(reps)
   if nlast_date:
     nl=datetime.strptime(nlast_date,"%B %d, %Y")

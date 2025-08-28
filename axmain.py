@@ -1,30 +1,22 @@
 #from mcontrol import main_mc 
 import sys
 sys.path.append("stockutils")
-
-from bs import main_bs,scrape_bs
-from mc import main_mc
-from shareindia import share_main
-from smifs import smifs_main
 from raxis import axis_main
+from geojit import geojit_main
+from idb import idbi_main
 import logging
 logger = logging.getLogger(__name__)
-#reports=["smifs","mc","bs","share","raxis"]
-reports=["raxis"]
+#reports=["geojit"]
+reports=["raxis","geojit","idbi"]
 def initialize_logger ():
-    logging.basicConfig(filename='/tmp/myapp.log', level=logging.INFO)
-    logger.info('Started Logging from main ')
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename='/tmp/myapp.log', level=logging.INFO)
+    logger.info('Started Logging from Axmain ')
 def add():
   initialize_logger()
-  if "mc" in reports:
-    main_mc()
-  if "bs" in reports:
-    scrape_bs()
-    main_bs()
-  if "share" in reports:
-      share_main()
-  if "smifs" in reports:
-      smifs_main()
+  if "geojit" in reports:
+    geojit_main()
   if "raxis" in reports:
       axis_main()
+  if "idbi" in reports:
+      idbi_main()
 add()

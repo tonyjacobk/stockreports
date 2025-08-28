@@ -10,7 +10,7 @@ import logging
 from bs4 import BeautifulSoup
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 def extract_report_information(rtext, ids=None):
     if ids is None:
@@ -54,7 +54,7 @@ def extract_report_information(rtext, ids=None):
         })
         logging.info(f"Added report for {company} (id={li_id})")
     
-    logging.info(f"Total reports extracted: {len(results)}")
+    logging.info(f" Axis Total reports extracted: {len(results)}")
     return results, ids
 
 
@@ -129,9 +129,9 @@ def transform_data( lastdate,A1: List[Dict[str, str]]) -> Tuple[List[Dict[str, s
 
         B = {}
         # Report Date
-        report_date_obj = datetime.strptime(A["time"], "%d %b %Y" )
+        report_date_obj = datetime.strptime(A["time"], "%d %b %Y" ).date()
         if report_date_obj> lastdate:
-         B["report-date"] = report_date_obj.strftime("%B %d, %Y")
+         B["report-date"] = report_date_obj
          B["broker"] = "Axis Securities"
          B["link"] = A.get("link", "")
          B["target"]=" " 
