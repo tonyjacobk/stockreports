@@ -3,6 +3,8 @@ name_dict={}
 key_dict={}
 from .ticker import preprocess_list,preprocess_text, new_search
 from .codedb import coddb
+import logging
+logger = logging.getLogger(__name__)
 
 def add_company_to_dict(name,key):
    first_word = name.split()[0].upper() if name else ''
@@ -95,7 +97,8 @@ def misc_check_company(input_string):
         return ['KEC International Limited',"KEC"]
     elif input_lower.startswith("hpcl"):
         return ['Hindustan Petroleum Corporation Limited',"HINDPETRO"]
-
+    elif input_lower=="sbi":
+        return ['State Bank of India',"SBIN"]
     else:
         return []
 
@@ -103,7 +106,11 @@ def misc_check_company(input_string):
 
 def find_company_easy(raw_name):
   print(raw_name ,"from find_company_asy")
+  for i in key_dict.keys():
+      print(i)
   name=key_dict.get(raw_name.strip()) # Checking if code is given in report instead of Name #
+  u=key_dict.get("BPCL")
+  print(u)
   if name:
       return 0, [name,raw_name]
   first_name=raw_name.strip().split()[0]
@@ -153,10 +160,12 @@ def get_comp_code(name):
  if ret == -1:
    ret,val = new_search(name)
    if ret==0:
+       logger.info("Mail:Added to codeDB %s  %s",val[0]['symbol_info'],val[0]['symbol'])
        coddb.insert_into_codedb( val[0]['symbol_info'],val[0]['symbol'])
        add_company_to_dict(val[0]['symbol_info'],val[0]['symbol'])
        return val[0]['symbol_info'],val[0]['symbol']
    else:
+       logger.info("Mail:Could not find NSECode for %s",name)
        return name,''
 
 

@@ -23,7 +23,33 @@ def find_rating_from_file():
     # Return the matched word if found, otherwise return None
  return match.group(1) if match else None
 
+def get_target_price_recomm_idbi(url): 
+ value=recom=""
+ try:
+  download_file(url)
+  value,recom=get_target_price_recomm_idbi2()
+ except Exception as e:
+  pass
+ return (value,recom)
 
+def get_target_price_recomm_idbi2():
+ recomms=["buy","sell","hold"]
+ recom=""
+ reader = PdfReader("tempfile")
+ page = reader.pages[0]  # Access the first page
+ text = page.extract_text()
+ lines =text.split('\n')
+ lc=-1
+ while lc<20:
+  lc=lc+1
+  i=lines[lc]
+  sline=i.strip()
+  slen=len(sline)
+  if slen ==3 or slen==4:
+    if sline.lower() in recomms:
+     recom=sline
+ tp=get_target_price_from_file()
+ return(tp,recom)
 
 def get_target_price_from_file():
  reader = PdfReader("tempfile")
@@ -31,7 +57,7 @@ def get_target_price_from_file():
  text = page.extract_text()
  print(text)
  pattern = re.compile(
-                r'target price[^\d]*([\d,]+(?:\.\d+)?|[\d.]+(?:,\d+)?)', 
+                r'(?:target price|tp)[^\d]*([\d,]+(?:\.\d+)?|[\d.]+(?:,\d+)?)', 
                 re.IGNORECASE
             )
             

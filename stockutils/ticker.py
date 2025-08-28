@@ -2,6 +2,9 @@ import requests
 from typing import Tuple,List,Dict,Optional
 from .nse_utils import nse
 import re
+import logging
+logger = logging.getLogger(__name__)
+
 def choose_only_equity_instruments(datalist):
       filtered_list = []
       for entry in datalist:
@@ -134,6 +137,7 @@ def find_best_match(nse_list):
       return  smallest
 
 def ask_for_help(text,best):
+        logger.error("NSE:Multiple options for ",text ,best)
         print ("Confusion ",text ,best)
 
 def expand_short_forms(raw_name: str) -> str:

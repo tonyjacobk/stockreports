@@ -46,20 +46,29 @@ def normalize_broker_name(brkr_name: str) -> str:
     elif "Emkay" in brkr_name:
         return "Emkay Global Financial"
     return brkr_name
+def valid_broker(brk):
+    brk_list=["Geojit","HDFC","Axis","SMIFS"]
+    for word in brk_list:
+        if word in brk:
+            return False
+    return True 
 
 def check_if_present(table):
  tobeadded=[]
  for i in table: ## list of new entries
   logger.info("\nTrying to add %s",i)
+  if not valid_broker(i["broker"]):
+      logger.info("Mail:Not adding : from Broker %s , %s",i["broker"],i)
+      continue
   try: 
    report_date_str = i['report-date'].rstrip('.') # Remove trailing dot
    try:
     datetime_object1 = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
     datetime_object = datetime.strptime(datetime_object1, "%Y-%m-%d").date()
-   except ValueError :
-     print ("Error ")
+   except ValueError as e:
+     logger.error ("Error with datetime conversion {e} ")
      continue
-   c= aiven.row_exists_no_comp(i["broker"],i["recommendation"],i["target"])
+   c= aiven.db.row_exists_no_comp(i["broker"],i["recommendation"],i["target"])
    if not c:
        logger.info("Not in Db. Adding")
        tobeadded.append(i)
@@ -72,9 +81,7 @@ def check_if_present(table):
     if diff <5:  ## May be same entry as in DB , must check the company name 
      logger.info("Report with same broker, recomm and target , must check name  ")
      if  compare_strings(i["Company"],entry["company"]):
-      logger.info("Not adding as rows are same  \n")
-      logger.info ("from Page ",i)
-      logger.info("\n from DB ",entry)
+      logger.info("Mail:Not adding . Page: %s , DB:%s \n",i,entry)
       mustbeadded=False
       break      
    if mustbeadded:
