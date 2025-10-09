@@ -20,7 +20,7 @@ def parse_log_file(log_file):
     code_db_added = []  # For "Added to Code DB" entries
     code_db_failed = []  # For "Could not add to code DB" entries
     check_date = None
-    
+    not_added=[]     
     for line in log_lines:
         # Extract the check date from any source line
         if 'Searching for reports newer than' in line and not check_date:
@@ -67,7 +67,7 @@ def parse_log_file(log_file):
                     smifs_data['Results'] = int(match.group(1))
         
         # Source data parsing (MC, BS, etc.)
-        elif re.match(r'.*Mail: (MC|BS|Axis|Geojith|IDBI)', line):
+        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct)', line):
             source_match = re.search(r'Mail: (\w+)', line)
             date_match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
             found_match = re.search(r'Found (\d+) new reports', line)
@@ -120,18 +120,20 @@ def parse_log_file(log_file):
                     'name': company_name,
                     'code': 'N/A'
                 })
-    
-    return shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date
+        elif 'Mail:Not adding' in line:
+          not_added.append(line)
+               
+    return shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added
 
-def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date):
+def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added):
     current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Report Summary (since {check_date})</title>
-    <style>
+    <!DOCTYPE html>
+    <html>
+    <head>
+     <title>Report Summary (since {check_date})</title>
+      <style>
         body {{
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -172,13 +174,16 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
         .code-table {{
             width: 60%;
         }}
+        .not-added-table {{
+            width: 100%;
+        }}
     </style>
 </head>
 <body>
     <h1>Report Summary</h1>
     <div class="timestamp">Generated on: {current_date}</div>
     <div class="check-date">Showing reports newer than: {check_date}</div>
-    
+
     <h2>Source Reports</h2>
     <table class="source-table">
         <tr>
@@ -188,7 +193,7 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
             <th>Added to DB</th>
         </tr>
 """
-    
+
     # Add Source table rows
     for entry in source_data:
         html += f"""
@@ -199,70 +204,10 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
             <td>{entry['added']}</td>
         </tr>
 """
-    
+
     html += """
     </table>
-    
-    <h2>Added to Code DB</h2>
-    <table class="code-table">
-        <tr>
-            <th>Name</th>
-            <th>Code</th>
-        </tr>
-"""
-    
-    # Add Code DB Added table rows
-    for entry in code_db_added:
-        html += f"""
-        <tr>
-            <td>{entry['name']}</td>
-            <td>{entry['code']}</td>
-        </tr>
-"""
-    
-    html += """
-    </table>
-    
-    <h2>Could not add to code DB</h2>
-    <table class="code-table">
-        <tr>
-            <th>Name</th>
-            <th>Code</th>
-        </tr>
-"""
-    
-    # Add Code DB Failed table rows
-    for entry in code_db_failed:
-        html += f"""
-        <tr>
-            <td>{entry['name']}</td>
-            <td>{entry['code']}</td>
-        </tr>
-"""
-    
-    html += """
-    </table>
-    
-    <h2>ShareIndia Reports</h2>
-    <table>
-        <tr>
-            <th>Report Type</th>
-            <th>Number of Reports</th>
-        </tr>
-"""
-    
-    # Add ShareIndia table rows
-    for report_type, count in shareindia_data.items():
-        html += f"""
-        <tr>
-            <td>{report_type}</td>
-            <td>{count}</td>
-        </tr>
-"""
-    
-    html += """
-    </table>
-    
+
     <h2>SMIFS Reports</h2>
     <table>
         <tr>
@@ -270,7 +215,7 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
             <th>Number of Reports</th>
         </tr>
 """
-    
+
     # Add SMIFS table rows
     for report_type, count in smifs_data.items():
         html += f"""
@@ -279,17 +224,95 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
             <td>{count}</td>
         </tr>
 """
-    
+
+    html += """
+    </table>
+
+    <h2>ShareIndia Reports</h2>
+    <table>
+        <tr>
+            <th>Report Type</th>
+            <th>Number of Reports</th>
+        </tr>
+"""
+
+    # Add ShareIndia table rows
+    for report_type, count in shareindia_data.items():
+        html += f"""
+        <tr>
+            <td>{report_type}</td>
+            <td>{count}</td>
+        </tr>
+"""
+
+    html += """
+    </table>
+
+    <h2>Added to Code DB</h2>
+    <table class="code-table">
+        <tr>
+            <th>Name</th>
+            <th>Code</th>
+        </tr>
+"""
+
+    # Add Code DB Added table rows
+    for entry in code_db_added:
+        html += f"""
+        <tr>
+            <td>{entry['name']}</td>
+            <td>{entry['code']}</td>
+        </tr>
+"""
+
+    html += """
+    </table>
+
+    <h2>Could not add to code DB</h2>
+    <table class="code-table">
+        <tr>
+            <th>Name</th>
+            <th>Code</th>
+        </tr>
+"""
+
+    # Add Code DB Failed table rows
+    for entry in code_db_failed:
+        html += f"""
+        <tr>
+            <td>{entry['name']}</td>
+            <td>{entry['code']}</td>
+        </tr>
+"""
+
+    html += """
+    </table>
+
+    <h2>Duplicate Reports</h2>
+    <table class="not-added-table">
+        <tr>
+            <th>Reason</th>
+        </tr>
+"""
+    # Add "Not Added" table rows
+    for line in not_added:
+        html += f"""
+        <tr>
+            <td>{line}</td>
+        </tr>
+"""
+
     html += """
     </table>
 </body>
 </html>
 """
-    
+
     return html
+    
 
 # Example usage with the log lines including MC data and code DB entries
 def get_report():
- shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date = parse_log_file("/tmp/maillog")
- html_output = generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date)
+ shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added = parse_log_file("/tmp/maillog")
+ html_output = generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added)
  return(html_output)

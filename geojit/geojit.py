@@ -87,9 +87,9 @@ def geojit_main():
  try:
   start_date=get_last_report_date("geojit") 
   recent_table,new_start_date=find_new_reports(start_date)
-  logger.info("Mail: Geojit Found %s new reports after scrapping",len(recent_table))
+  logger.info("Mail: geojit Found %s new reports after scrapping",len(recent_table))
   print_table(recent_table,logger)
-  db.insert_into_database(recent_table,"geojith")
+  db.insert_into_database(recent_table,"geojit")
   update_last_report_date("geojit",new_start_date)
  except Exception as e:
   logger.error(f"Geojit: had issues  {e}")

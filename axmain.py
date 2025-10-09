@@ -4,10 +4,11 @@ sys.path.append("stockutils")
 from raxis import axis_main
 from geojit import geojit_main
 from idb import idbi_main
+from icicid import icici_main
 import logging
 logger = logging.getLogger(__name__)
-#reports=["geojit"]
-reports=["raxis","geojit","idbi"]
+#reports=["icicid"]
+reports=["raxis","geojit","idbi","icicid"]
 def initialize_logger ():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename='/tmp/myapp.log', level=logging.INFO)
     logger.info('Started Logging from Axmain ')
@@ -19,4 +20,6 @@ def add():
       axis_main()
   if "idbi" in reports:
       idbi_main()
+  if "icicid" in reports:
+      icici_main()
 add()

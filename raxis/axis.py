@@ -108,9 +108,14 @@ def extract_target_price(text):
     for pattern in patterns:
         match = re.search(pattern, text_lower)
         if match:
-            price = match.group(1)
+            price_str = match.group(1).replace(',','')
+            try:
+                price_num = float(price_str)
+                # Return as int if whole number, else float
+                return int(price_num) if price_num.is_integer() else price_num
+            except ValueError:
+                continue
             # Return as integer if it's a whole number, otherwise as float
-            return price
     
     return ""
 
@@ -146,6 +151,7 @@ def transform_data( lastdate,A1: List[Dict[str, str]]) -> Tuple[List[Dict[str, s
          else:
             B["Company"] = company_raw
             B["recommendation"] = ""
+            B["RR"]=False
          if any(company_raw.startswith(prefix) for prefix in target_map):
             B["target"]=extract_target_price(A.get("text",""))
          if company_raw.startswith("Result Update:"):

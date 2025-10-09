@@ -140,8 +140,8 @@ def axis_main():
   logger.info("Mail: Axis found %s valid reports in this round",len(reps))
   reports.extend(reps)
  print_table(reports,logger)
- logger.info("Mail: Axis Found %s reports ",len(reports))
+ logger.info("Mail: Axis Found %s new reports ",len(reports))
  db.insert_into_database(reports,"axis")
  if len(reports) >0:
-  update_last_report_date("Axis",,reports[0]["report-date"])
+  update_last_report_date("Axis",reports[0]["report-date"])
  print(reports)

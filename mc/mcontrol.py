@@ -22,8 +22,8 @@ def parse_recommendation(title):
             company= title.split(":")[0].split(" ", 1)[1].strip()
         else:
              company = title.split(";")[0].split(" ", 1)[1].strip()
-        target_match = re.search(r"target of Rs (\d+)", title)
-        target = int(target_match.group(1)) if target_match else None
+        target_match = re.search(r"target of Rs ([\d,]+(?:\.\d+)?)", title)
+        target = float(target_match.group(1).replace(",", "")) if target_match else None
         broker = title.split(":")[-1].strip()
 
         return {
