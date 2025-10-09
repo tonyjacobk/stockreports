@@ -76,13 +76,13 @@ def process_list(clist,company):
     if not clist:
            return -1,None
     if len(clist)==1 :
-      ret,val=is_this_same_company(company,clist[0]['symbol_info'])
+      ret,val=is_this_same_company(company,clist[0]['symbol_info'],clist[0]['symbol'])
       if ret:
           return 0,clist
       return -1,None
     new_list=[]
     for item in clist:
-        ret,val=is_this_same_company(company,item['symbol_info'])
+        ret,val=is_this_same_company(company,item['symbol_info'],item['symbol'])
         print ( ret,val,company,item['symbol_info'],"same comp")
         if ret:
             new_list.append(item)
@@ -94,8 +94,11 @@ def process_list(clist,company):
 
     return 1,new_list
 
+##Only True False is being used 
      
-def is_this_same_company(from_report,from_nse):
+def is_this_same_company(from_report,from_nse,symbol_from_nse):
+      if from_report.lower()== symbol_from_nse.lower():
+        return True,"" 
       print ("In is_this_same_company")
       report_cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', from_report).lower()
       nse_cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', from_nse).lower()
@@ -191,30 +194,57 @@ def preprocess_list(comp_list):
         i["symbol_info"]=preprocess_text(i["symbol_info"])
     return (comp_list)
 
+def initials_check(complist,text):
+ parts=text.split()
+ first=parts[0]+parts[1]
+ newName=" ".join([first] + parts[2:])
+ ret,val=process_list(complist,newName)
+ return ret,val       
 
+def check_company_with_the_key(key):
+   complist=nse.get_companies(key)
+   if len(complist)==0:
+         return -1,[]
+   complist=extended_tests(complist)  ## Remove non equity instruments
+   print("After extended tests",complist)
+   if  not complist:
+      return -1,[]
+   complist=remove_unwanted_keys(complist) ##Removing all info other than company code and Name
+   print ("After remove_unwanted keys",complist)
+   if len(complist) >1 :
+       return 1,complist
+   return 0,complist
 
 def new_search(text: str):
+       initial=False
        text=preprocess_text(text)
        print ("Preprocessed Input:", text)
        start_word = text.split()[0]
        if len(start_word) < 2:
            start_word= start_word+text.split()[1]
+           initial =True
        complist=nse.get_companies(start_word)
        print ("from NSE",complist)
        if len(complist)==0:
          return -1,[]
-       complist=extended_tests(complist)
+       complist=extended_tests(complist)  ## Remove non equity instruments 
        print("After extended tests",complist)
        if  not complist:
          return -1,[]
-       complist=remove_unwanted_keys(complist)
+       complist=remove_unwanted_keys(complist) ##Removing all info other than company code and Name
        print ("After remove_unwanted keys",complist)
-       complist=preprocess_list(complist)
+       complist=preprocess_list(complist) #Removes the. Replaces non alpha , . with space and multi space with single space
        print("After pre processing",complist)
-       ret,val=process_list(complist,text)
+       ret,val=process_list(complist,text) ## Checks all company Names found from NSE and sees if only one matches the Name from textn
        print("After process_list",val)       
        if ret == -1:
-           return -1,[]
+         if not initial: 
+            return -1,[]
+         ret,val=initials_check(complist,text)
+         if ret == -1:
+            return -1,[]
+         if ret ==0:
+            return 0,val
        if ret==0:
            return 0,val
        best=find_best_match(val)

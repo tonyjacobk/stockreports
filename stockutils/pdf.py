@@ -12,12 +12,18 @@ def download_file(url):
 
  except requests.exceptions.RequestException as e:
        raise e 
-  
+
+def download_and_return_text(url):
+ download_file(url)
+ reader = PdfReader("tempfile")
+ page = reader.pages[0]  # Access the first page
+ return(page.extract_text())
+
 def find_rating_from_file():
  reader = PdfReader("tempfile")
  page = reader.pages[0]  # Access the first page
  text = page.extract_text()
-
+ print(text)
  match = re.search(r'Rating:\s*(\w+)', text)
 
     # Return the matched word if found, otherwise return None
@@ -113,3 +119,45 @@ def get_recomm_and_target(url):
  print (value,recomm)
  return value ,recomm
 
+def get_data_and_recomm_icicid(url):
+ try:
+  text= download_and_return_text(url)
+  print(text)
+  results = {
+        'recommendation': None,
+        'date': None
+    }
+  non_empty_lines = [line.strip() for line in text.splitlines() if line.strip()]
+  first_six_lines = non_empty_lines[:6]
+
+  recommendation_pattern = re.compile(r'\b(BUY|HOLD|REDUCE|SELL)\b', re.IGNORECASE)
+  date_pattern = re.compile(
+        r'(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}'
+    )
+
+  for line in first_six_lines:
+        if not results['recommendation']:
+            rec_match = recommendation_pattern.search(line)
+            if rec_match:
+                results['recommendation'] = rec_match.group(1).upper()
+
+        if not results['date']:
+            date_match = date_pattern.search(line)
+            if date_match:
+                results['date'] = date_match.group(0)
+
+        # Stop searching if both have been found
+        if results['recommendation'] and results['date']:
+            break
+  if not results['date'] and len(non_empty_lines) > 6:
+        last_three_lines = non_empty_lines[-3:] # Get the last 3 elements
+        for line in last_three_lines:
+            date_match = date_pattern.search(line)
+            if date_match:
+                results['date'] = date_match.group(0)
+                break # Stop searching the last 3 lines once found 
+  return results
+
+ except Exception as e:
+  print("Could not get from :",url)
+  print(str(e))

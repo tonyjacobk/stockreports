@@ -1,5 +1,5 @@
 import pymysql
-from file_utils import read_first_line
+from .file_utils import read_first_line
 import logging
 logger = logging.getLogger(__name__)
 timeout = 10
@@ -34,8 +34,9 @@ class CodeClient:
             FROM codes
             WHERE code  = %s
            """
-      cursor.execute(query, (code))
-      result = cursor.fetchone()
+      self.cursor.execute(query, (code))
+      result = self.cursor.fetchone()
+      return(result)
       print(code,result)
  def field_exists(self,var,field):
 

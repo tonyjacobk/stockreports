@@ -10,26 +10,43 @@ def add_company_to_dict(name,key):
    first_word = name.split()[0].upper() if name else ''
    if first_word=="THE":
       first_word = name.split()[1].upper()
+   if len(first_word) < 2:   ## Names starting with single letters ##
+     modified_name=combine_single_letters(name)
+     first_word=modified_name.split()[0].upper()
+
    if first_word:
                 if first_word not in name_dict:
                     name_dict[first_word] = []
                 name_dict[first_word].append([name, key])
+   ret,val=process_key_special_chars(first_word) # Adding extra keys  when name contains special chars like Five-star to have Five also 
+   if ret==1:
+       k=val[0].upper()
+       if k  not in name_dict:
+                name_dict[k] = []
+                name_dict[k].append([name, key])
+   vals=dot_variants(first_word)
+   if len(vals) >1:
+         for val  in vals:
+          uval=val.upper()
+          if uval  not in name_dict:
+                name_dict[uval] = []
+                name_dict[uval].append([name, key])
 
 def create_name_dictionary():
+ global key_dict
  key_dict=coddb.create_dictionary()
  print("Keys",len(key_dict.keys()))
  for key in key_dict.keys():
    name=key_dict[key]
    add_company_to_dict(name,key)   
 
-
 def find_correct_company_from_list(raw_name,comp_list):
  for i in comp_list:
+    i[0]=i[0].replace("&"," And ")
     i[0]=preprocess_text(i[0])
+    i[0]=combine_single_letters(i[0])
  print ("After preprocessing",comp_list)
  ss = raw_name.lower().split()  # Split `st` into words: ["hello", "world"]
- print (ss)
- print ("Comp list",comp_list) 
  # Find all x in ll where for each i, ss[i] is a substring of x[i]
  result = [
     x  for x in comp_list 
@@ -59,6 +76,43 @@ def combine_single_letters(input_str):
             return ''.join(combined) + (' ' + ' '.join(parts[i:]) if i < len(parts) else '')
 
     return input_str  # No combining needed
+
+
+
+def process_key_special_chars(input_string):
+    result = []
+
+    split_index = -1
+    for i, char in enumerate(input_string):
+        if not (char.isalnum() or char == '.'):
+            split_index = i
+            break
+
+    if split_index != -1:
+        return 1,[input_string[:split_index]]
+    return -1,[]
+
+def dot_variants(s: str) -> list[str]:
+    results = set()
+
+    def helper(prefix, rest):
+        if not rest:  # nothing left to process
+            results.add(prefix.strip())
+            return
+        if rest[0] == '.':
+            # Case 1: remove the dot
+            helper(prefix, rest[1:])
+            # Case 2: replace with space
+            helper(prefix + ' ', rest[1:])
+        else:
+            # Just carry forward the character
+            helper(prefix + rest[0], rest[1:])
+
+    helper("", s)
+    return list(results)
+
+
+
 
 
 
@@ -99,23 +153,32 @@ def misc_check_company(input_string):
         return ['Hindustan Petroleum Corporation Limited',"HINDPETRO"]
     elif input_lower=="sbi":
         return ['State Bank of India',"SBIN"]
+    elif input_lower.startswith("hg infra"):
+        return ['H G Infra Engineering Limited', 'HGINFRA']
+    elif input_lower.startswith("jindal steel"):
+        return ['Jindal Steel Power Limited','JINDALSTEL']
+    elif input_lower=="iocl":
+        return ['Indian Oil Corporation Limited','IOC']
+    elif input_lower=="nalco":
+        return ['National Aluminium Company Limited','NATIONALUM']
+    elif  input_lower.startswith("oil and natural"):
+        return ['Oil & Natural Gas Corporation Limited','ONGC']
     else:
         return []
 
 
 
 def find_company_easy(raw_name):
+  global key_dict,name_dict
   print(raw_name ,"from find_company_asy")
-  for i in key_dict.keys():
-      print(i)
+  print("Keys",len(key_dict.keys()))
   name=key_dict.get(raw_name.strip()) # Checking if code is given in report instead of Name #
-  u=key_dict.get("BPCL")
-  print(u)
   if name:
       return 0, [name,raw_name]
   first_name=raw_name.strip().split()[0]
-  print(first_name)
+  print("First Name",first_name)
   name_list=name_dict.get(first_name.upper())
+  print ("Companies with first Name",name_list)
   if not name_list:
       print("Key not found")
       return -1,None
@@ -126,11 +189,34 @@ def find_company_easy(raw_name):
        return -1,None
   if len(p) == 1:
    return 0,p[0]
+  if raw_name.strip().lower() =="sbi":
+   return 0,["State Bank of India","SBIN"]
   return 1,p
 
+def combine_single_letter_and_check(raw_name):
+    new_name=combine_single_letters(raw_name)
+    if new_name == raw_name:
+       return -1,[]
+    ret,val=find_company_easy(new_name)
+    if ret==0:
+      return 0,val
+    else:
+       val= misc_check_company(new_name)
+       print(val,"After Misc2")
+       if val:
+        return 0,val
+       else:
+         return -1,[]
 
-def find_company(raw_name):
- raw_name=preprocess_text(raw_name)
+
+
+
+
+def find_company(raw_name_i):
+ raw_name=raw_name_i.replace("&", " And ")
+ raw_name=preprocess_text(raw_name) # removes the, . becomes space , Multiple spaces and special chars removed 
+ print ("After Preprocess",raw_name)
+ raw_name=combine_single_letters(raw_name)
  ret,val=find_company_easy(raw_name)
  if ret!=-1:
      return ret,val
@@ -139,19 +225,27 @@ def find_company(raw_name):
  if val:
      return 0,val
  else:
-   new_name=combine_single_letters(raw_name)
-   ret,val=find_company_easy(new_name)
+   ret,val=combine_single_letter_and_check(raw_name)
    if ret==0:
-     return 0,val
+    return ret,val
    else:
-     val= misc_check_company(new_name)
-     print(val,"After Misc2")
-     if val:
-       return 0,val
-     else:
-         return -1,[]
-          
+    ret,val=check_for_name_with_special_char(raw_name_i)
+    if ret==0:
+        return ret,val
+    else:
+     return -1,[]
   
+def check_for_name_with_special_char(raw_name):
+   first_name=raw_name.strip().split()[0]
+   check=all(c.isalnum() or c == '.' for c in first_name)
+   if  check :
+       return -1,[]
+   name_list=name_dict.get(first_name.upper())
+   p=find_correct_company_from_list(preprocess_text(raw_name),name_list)
+   if len(p)==0:
+       return -1,None
+   if len(p) == 1:
+    return 0,p[0]
 
 def get_comp_code(name):
  ret,val=find_company(name)
@@ -167,7 +261,6 @@ def get_comp_code(name):
    else:
        logger.info("Mail:Could not find NSECode for %s",name)
        return name,''
-
 
 
 

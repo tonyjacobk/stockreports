@@ -61,6 +61,7 @@ def check_if_present(table):
       logger.info("Mail:Not adding : from Broker %s , %s",i["broker"],i)
       continue
   try: 
+   print(i)
    report_date_str = i['report-date'].rstrip('.') # Remove trailing dot
    try:
     datetime_object1 = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
@@ -69,6 +70,7 @@ def check_if_present(table):
      logger.error ("Error with datetime conversion {e} ")
      continue
    c= aiven.db.row_exists_no_comp(i["broker"],i["recommendation"],i["target"])
+   logger.info("Found %s entries",len(c))
    if not c:
        logger.info("Not in Db. Adding")
        tobeadded.append(i)

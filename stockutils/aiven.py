@@ -2,8 +2,9 @@ import pymysql
 from datetime import datetime,date
 import logging
 import contvar
+import re
 logger = logging.getLogger(__name__)
-from file_utils import read_first_line
+from .file_utils import read_first_line
 from .create_dic import get_comp_code
 timeout = 10
 
@@ -73,7 +74,21 @@ class DBClient:
    print(str(err))
    logger.error("Could not add this report %s",data)
    logger.error("Something went wrong: %s",str(err))
- 
+
+ def find_no_code(self):
+  try:
+   query = f"""
+     SELECT * FROM reports WHERE NSEKEY is NULL or NSEKEY=''
+    """
+   self.cursor.execute(query)
+   clist =""
+   for i in self.cursor:
+       clist=clist+i["company"]+","
+   return clist
+  except pymysql.connect.Error as err:
+   print(str(err))
+   logger.error("Something went wrong while finding No code list: %s",str(err))
+   return ""
 
  def insert_into_database(self,data_list, site):
   """
@@ -102,8 +117,11 @@ class DBClient:
      report_date_str = data['report-date'].rstrip('.') # Remove trailing dot
 # Convert to MySQL date format (YYYY-MM-DD)
      mysql_date_str = datetime.strptime(report_date_str, "%B %d, %Y").strftime("%Y-%m-%d")
-
-    realname,code=get_comp_code( data['Company'])
+    if "RR" in data.keys() and not data["RR"]:  ## IDBI has RR true for individual 
+     realname=data['Company']
+     code="SECTOR"
+    else:
+     realname,code=get_comp_code( data['Company'])
  # Prepare data for insertion
     insert_data = (
     realname,
@@ -115,7 +133,6 @@ class DBClient:
     mysql_date_str,
     site
  )
- 
  # SQL query
     query = ("INSERT IGNORE INTO reports  (company, NSEKEY, broker, URL, recommendation, target, report_date, site) "
  "VALUES (%s, %s, %s, %s, %s, %s, %s,%s)")
