@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Manager</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .header { 
+            position: sticky; top: 0; background: white; padding: 15px 30px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; margin-left: 10px; }
+        .save-btn { background-color: #28a745; }
+        .db-btn { background-color: #007bff; }
+        
+        .entry-card { background: white; padding: 20px; margin: 20px auto; border-radius: 8px; border: 1px solid #ddd; width: fit-content; }
+        .field-row { display: flex; gap: 12px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .field { display: flex; flex-direction: column; }
+        .checkbox-field { flex-direction: row; align-items: center; gap: 5px; padding-bottom: 10px; }
+        
+        label { font-size: 11px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .analysis-text {
+            font-family: 'Courier New', monospace; font-size: 14px;
+            border: 1px solid #ccc; padding: 10px; resize: none; line-height: 1.2;
+        }
+        .flash-msg { padding: 10px; background: #d4edda; margin-bottom: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<form action="/process" method="post">
+    <div class="header">
+        <h2 style="margin:0;">Analysis Workflow</h2>
+        <div>
+            <button type="submit" name="action" value="save_file" class="btn save-btn">SAVE TO FILE</button>
+            <button type="submit" name="action" value="update_db" class="btn db-btn">UPDATE DB</button>
+        </div>
+    </div>
+
+    
+
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46603" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46603" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46603" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" selected>Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2025-12-30" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!3Q8gTB7J!JPWHGexgA35jSis9uksGwuVZlt4d7CGsaxF2zULs8ZE"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>JSW_Steel_Flash_Note.pdf||Please see Disclaimer for analyst certifications and all other important disclosures. Metals &amp; Mining Saurabh Mitra 91-22-4215 9364 saurabh.mitra@centrum.co.in Institutional Research Flash Note India I Metals &amp; Mining 04 December, 2025 NIFTY 50: 25,986 BSE Sensex: 85,107 JSTL versus NIFTY 50 1m 6m 1 year AJSTL IN (3.2) 18.1 15.0 UNIFTY 50 1.5 5.5 6.2 Source: Bloomberg, NSE JSW Steel BPSL deal marks a step toward deleveraging Financial and valuation summary JSW Steel (JSTL IN) has announced a 50:50 joint venture with Japan’s JFE Steel (JFE). As part of the agreement, Bhushan Power and Steel (BPSL), a wholly owned subsidiary transaction in our estimates. We reiterate our NEUTRAL rating and TP of Rs 1,114, based on 7.5x September 2027E EV/EBITDA. </textarea>
+        </div>
+    </div>
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46634" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46634" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46634" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" >Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2025-12-31" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!rMs1CIbT!AhMGC5ybpavpcPcigxOwMJNSqIeeuAdRv9bdGo-DYyQ"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>Praveg - Management Meet Update - 30-12-2025 - Systematix.pdf||Systematix Research is also available on Bloomberg SSSL &lt;Go&gt;, Thomson &amp; Reuters Systematix Shares and Stocks (India) Limited Investors are advised to refer disclosures made at the end of the research report. 1 Praveg Aggressive ‘Low-Capex’ expansion We hosted a virtual conference call with Praveg (PRAVEG IN ; NOT RATED) , a leading hospitality and a premier advertising and event management company in India’s hospitality sector . The company focuses on a unique ’Low-Capex, Rapid - Deployment’ hospitality model to meet an aggressive expansion trajectory that targets 3x portfolio growth from ~850 to ~2,500 keys by CY28. The company is 2025 CONFERENCE TAKEAWAYS Sector: Hotels Rating: NR CMP: Rs 318 Target Price: NA Stock Info Sensex/Nifty 84,675/25,939 Bloomberg PRAVEG IN Equity shares</textarea>
+        </div>
+    </div>
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46648" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46648" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46648" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" >Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2025-12-31" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!HdEHXQrR!n87OuOvTdpFm16DnDDGVWj25s7QpeKY_nkWcUd65bQo"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>Skipper - Initiating Coverage - 29-12-2025 - Systematix.pdf||Systematix Research is also available on Bloomberg SSSL &lt;Go&gt;, Thomson &amp; Reuters Systematix Shares and Stocks (India) Limited Investors are advised to refer disclosures made at the end of the research report. 1 Skipper Ltd. Domestic T&amp;D Leader Accelerating Global Expansion Skipper Ltd. ( SKIPPER IN ) is India’s largest manufacturer of transmission line (TL) towers, with installed capacity of 3,75,000 MTPA as of 2QFY26 end. Over the past two years, a sharp pick up in domestic TBCB (Tender Based Competitive Bidding) tenders has driven the company’s performance , while exports have been resilient. With capacity now ramped up, we of 20%/24%/34% CAGR over FY25-28E. Initiate coverage with BUY and TP of INR 490, based on 16x FY28E EPS. Low-cost integrated INITIATING COVERAGE Sector: Capital Goods Rating: BUY CMP: Rs 423 Target Price: Rs 490 Stock Info Sensex/Nifty 85,041/26,042 Bloomberg SKIPPER IN Equity grow at 14% CAGR over FY25-28E. Initiate coverage with BUY, TP of INR 490 SKIPPER’s integrated manufacturing for T&amp;D structures, largest 0%/34% over FY2 5-28E, respectively, and initiate coverage with BUY, TP of INR 490 based on 16x FY28E earnings. 24 December</textarea>
+        </div>
+    </div>
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46710" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46710" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46710" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" >Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2026-01-01" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!OEFX3QwA!wXljsvtmnoHQm3U5gb4ZOlxFqMHpfvMaI-nisfkgwVc"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>Metal Mining Antique Safeguard Duty Impact.pdf||STRICTLY CONFIDENTIAL AMP Please refer to disclosures at the end of the Research Report ANTIQUE’S M ORNING P RESENTATION 1 January 2026 Market Snapshot Global Indices Closing % Chg % YTD Dow Jones 48,063 (0.6) 13.0 NASDAQ 23,242 (0.8) 20.4 FTSE 9,931 (0.1) - CAC 8,150 (0.2) 10.4 DAX 24,490 0.6 - Bovespa 1,61,125 0.4 34.0 Nikkei 50,339 (0.4) - Hang Seng 25,631 (0.9) 27.8 Shanghai Composite 3,969 0.1 18.4 Indian Indices Closing % Chg % YTD Sensex 85,221 0.6 - Nifty 26,130 0.7 - MSCI India 1,055 0.7 3.0 CNX Midcap 60,485 1.0 - BSE Smallcap 51,525 1.2 - prices. Our preferred picks in the sector are Tata Steel (TP of INR 199) and Jindal Steel (TP of INR 1,171). are Tata Steel (TP of INR 199) and Jindal Steel (TP of INR 1,171). Chinese steel prices continue to soften; production</textarea>
+        </div>
+    </div>
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46719" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46719" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46719" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" >Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2026-01-01" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!6F1iSZ5T!1mSFJG0aFf2qo_R7btamgnFFxOYFmBUx7a6aMW-Nf2A"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>Goldman_Sachs_2026_Outlook_Tech_Tonic_—_a_broadening_bull_market.pdf||We remain constructive on equities for 2026 as earnings continue to grow, n but forecast lower index returns than in 2025, amid a broadening bull market. This fits with our economic outlook, where we expect continued economic n expansion in all regions combined with further modest easing by the US Federal Reserve. Given this macro backdrop, it would be unusual to see a significant equity setback/bear market without a recession, even from elevated valuations. Our 12-month equity forecasts, weighted by regional market cap, would give n 13% price returns in 2026, 15% with dividends, in USD. Most of these returns fallen and are likely to remain low. In summary, we recommend that investors: Stay invested, diversify across regions (with an increased</textarea>
+        </div>
+    </div>
+    
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="46758" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_46758" >
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_46758" >
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    <option value="Motilal Oswal" >Motilal Oswal</option><option value="Emkay Global Financial" >Emkay Global Financial</option><option value="ICICI Securities" >ICICI Securities</option><option value="ICICI Direct" >ICICI Direct</option><option value="Axis Securities" >Axis Securities</option><option value="Prabhudas Lilladher" >Prabhudas Lilladher</option><option value="Edelweiss Securities" >Edelweiss Securities</option><option value="JM Financial" >JM Financial</option><option value="Dolat Capital Market" >Dolat Capital Market</option><option value="Systematix" >Systematix</option><option value="Choice Equity Broking" >Choice Equity Broking</option><option value="Deven Choksey" >Deven Choksey</option><option value="IDBI Capital" >IDBI Capital</option><option value="Keynote Capital" >Keynote Capital</option><option value="Ashika Stock broking" >Ashika Stock broking</option><option value="InCred Equities" >InCred Equities</option><option value="Kotak Securities" >Kotak Securities</option><option value="Nirmal Bang" >Nirmal Bang</option><option value="Yes Securities" >Yes Securities</option><option value="Geojit Financial Services" >Geojit Financial Services</option><option value="Mirae Asset Sharekhan" >Mirae Asset Sharekhan</option><option value="Elara Capital" >Elara Capital</option><option value="Anand Rathi" >Anand Rathi</option><option value="Philip Capital" >Philip Capital</option><option value="Ventura Securities" >Ventura Securities</option><option value="SBI Securities" >SBI Securities</option><option value="SMIFS" >SMIFS</option><option value="LKP Research" >LKP Research</option><option value="Arihant Capital" >Arihant Capital</option><option value="HEM Securities" >HEM Securities</option><option value="HDFC Securities" >HDFC Securities</option><option value="Share India" >Share India</option><option value="Centrum Broking" >Centrum Broking</option><option value="SMC Global" >SMC Global</option><option value="B&amp;K Securities" >B&amp;K Securities</option><option value=" Trinetra Asset Managers" > Trinetra Asset Managers</option><option value="Equirus Securities" >Equirus Securities</option><option value="MasterTrust" >MasterTrust</option><option value="Scoop Investment" >Scoop Investment</option><option value="Investec" >Investec</option><option value="DAM Capital" >DAM Capital</option><option value="Networth Capital" >Networth Capital</option><option value="Khambatta Securities" >Khambatta Securities</option><option value="Antique Broking" >Antique Broking</option><option value="CLSA" >CLSA</option><option value="Ambit" >Ambit</option><option value="Goldman Sachs" >Goldman Sachs</option><option value="Jeffries" >Jeffries</option><option value="Nomura" >Nomura</option><option value="UBS" >UBS</option><option value="JP Morgan" >JP Morgan</option><option value="Monarch Networth Capital Linited" >Monarch Networth Capital Linited</option><option value="DSP" >DSP</option><option value="Sunidhi" >Sunidhi</option><option value=" BP Equities" > BP Equities</option><option value=" Bernstein" > Bernstein</option><option value="NDA Securities" >NDA Securities</option><option value="FRONTWAVERESEARCH" >FRONTWAVERESEARCH</option>
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value=""></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="2026-01-01" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value=""></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="https://mega.co.nz/#!qZUkSKja!ypeiMc96kGKjBk9H56FNzLoek0lmBJYG3lvO6vkj2PI"></div>
+        </div>
+        <div class="field">
+            <label>Text (200 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>SBI_Securities_Pick_of_the_Day_Force_Motors_Ltd_,_with_TP_20850.pdf||Company Name: Force Motors Ltd. NSE Code FORCEMOT BSE Code 500033 Market Cap (Rs cr) 25,022 Avg. Trading Vol. in lakh (5 days/30 days) 0.4/0.5 Avg. Delivery Vol. in lakh (5 days/30 days) 0.2/0.2 Promoter Holding (%) 61.6 Pledge (%) 0.0 CMP (Rs) 18,950 Accumulation Range (Rs) 18,760 -19,140 Target (Rs) 20,850 Upside Potential (%) 10.0% Duration 6-12 Months Source: ACE Equity, SSL Research Force Motors Ltd is a leading manufacturer of commercial vehicles such as buses and vans used for school children and employee transport. Its popular brand includes the ‘Traveller’ which is a market leader in its segment our call guide mentioned below. Recommendation History Date Stock Price Target Price Recommendation Status 15/05/2025 10,477 11,525 BUY Booked Profit at Rs</textarea>
+        </div>
+    </div>
+    
+</form>
+
+</body>
+</html>
