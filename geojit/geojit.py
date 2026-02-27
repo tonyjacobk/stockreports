@@ -5,7 +5,7 @@ import codecs
 import logging
 from stockutils import print_table
 from stockutils import db
-from stockutils import get_last_report_date,update_last_report_date
+from stockutils import get_last_report_date,update_last_report_date,add_codes_to_reports
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ def geojit_main():
   recent_table,new_start_date=find_new_reports(start_date)
   logger.info("Mail: geojit Found %s new reports after scrapping",len(recent_table))
   print_table(recent_table,logger)
+  add_codes_to_reports(recent_table)
   db.insert_into_database(recent_table,"geojit")
   update_last_report_date("geojit",new_start_date)
  except Exception as e:

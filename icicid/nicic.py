@@ -91,7 +91,7 @@ def icici_main():
    logger.info("Mail: ICICI Direct Found %s new reports after scrapping ",len(reps))
    if len(reps) ==0:
     return 
-   cdets=check_if_present(reps)
+   cdets=check_if_present(reps,"icici")
    logger.info("Mail: ICICI Direct found %s reports for adding to db",len(cdets))
    print_table(cdets,logger)
    db.insert_into_database(cdets,"icd")
