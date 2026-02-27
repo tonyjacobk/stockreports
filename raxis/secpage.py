@@ -3,7 +3,7 @@ import json # To pretty-print JSON response if applicable
 from typing import List, Union
 from .axis import extract_report_information,transform_data
 from datetime import datetime
-from stockutils import get_last_report_date,update_last_report_date
+from stockutils import get_last_report_date,update_last_report_date,add_codes_to_reports
 from stockutils import print_table,db
 import logging
 logger = logging.getLogger(__name__)
@@ -131,6 +131,9 @@ def axis_main():
  while not lastfound:
   try:
     k=fetch_axisdirect_reports(ids,len(ids)) 
+    if not k:
+        logging.error("Axis Could not read pages ..")
+        break
   except Exception as e:
     logging.error("Axis :Issue with Json format. Exiting .. . Will add already found reports")
     break
@@ -139,9 +142,22 @@ def axis_main():
   reps,lastfound=transform_data(lastdate,results)
   logger.info("Mail: Axis found %s valid reports in this round",len(reps))
   reports.extend(reps)
+ print("Sector reports") 
+ sector=[]
+ for i in range(len(reports) - 1, -1, -1):
+     if "RR"  in reports[i]  and not reports[i]['RR']:
+       nrow={'company':reports[i]['Company'],'broker':reports[i]['broker'],'link':reports[i]['link'],'report-date':reports[i]['report-date'],'site':'axis'}
+       sector.append(nrow)
+       reports.pop(i)
+ logger.info("Adding following company reports")
  print_table(reports,logger)
- logger.info("Mail: Axis Found %s new reports ",len(reports))
+ logger.info("Adding following Sector reports")
+ print_table(sector,logger)
+ logger.info("Mail: Axis Found %s new reports ",len(reports)+len(sector))
+ logger.info("Mail: Axis Found %s new sector-reports ",len(sector))
+ add_codes_to_reports(reports)
  db.insert_into_database(reports,"axis")
- if len(reports) >0:
+ db.insert_into_sector(sector)
+
+ if len(reports)+len(sector) >0:
   update_last_report_date("Axis",reports[0]["report-date"])
- print(reports)
