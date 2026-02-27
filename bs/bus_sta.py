@@ -12,6 +12,51 @@ logger = logging.getLogger(__name__)
 
 recent_table=[]
 
+def convert_non_standard_date(date_string):
+
+
+ month_abbreviations = {
+    'Sep': 'Sep',  # Keep standard one for completeness
+    'Sept': 'Sep', # Map "Sept" to "Sep"
+    'Mar.': 'Mar', # Example for another potential variation
+    'Apr.': 'Apr'  # Another example
+}
+
+# Split the date string to access the month part
+ parts = date_string.split('-')
+ day = parts[0]
+ month = parts[1]
+ year = parts[2]
+
+# Check if the month abbreviation is in our mapping
+ if month in month_abbreviations:
+    # Get the standard abbreviation
+    standard_month = month_abbreviations[month]
+    # Reconstruct the date string with the standard abbreviation
+    standardized_date_string = f"{day}-{standard_month}-{year}"
+
+    # Now, parse the standardized date string
+    formatted_date = datetime.strptime(standardized_date_string, "%d-%b-%Y").strftime("%B %d, %Y")
+    return(formatted_date)
+ else:
+     return(" ")
+
+
+
+
+def get_date(date_string):
+ try:
+    formatted_date = datetime.strptime(date_string, "%d-%b-%Y").strftime("%B %d, %Y")
+ except ValueError:
+    formatted_date=convert_non_standard_date(date_string)
+ return(formatted_date)
+
+
+
+
+
+
+
 def parse_row(html_row):
     """
     Parses a given HTML table row to extract Company, broker, URL, and target price.
@@ -53,11 +98,11 @@ def parse_row(html_row):
         date_tag = html_row.find_all('td')[4]
         if date_tag:
             date_string=date_tag.get_text(strip=True)
-            formatted_date=datetime.strptime(date_string, "%d-%b-%Y").strftime("%B %d, %Y")
+            formatted_date=get_date(date_string)
             data["report-date"] = formatted_date
         else:
             data["report-date"] = None
-
+        print ("report date is ",data['report-date'])
         # Extract URL
         # The URL is in the href attribute of the <a> tag within the last <td>
         url_tag = html_row.find_all('td')[-1].find('a')
@@ -84,6 +129,7 @@ def parse_row(html_row):
     return data
 
 def find_new_reports(start_date):
+ print("here in find_new_reps")
  new_start_date=start_date
  with open("./bs.txt", "r") as file:
     content = file.read()
@@ -119,7 +165,7 @@ def main_bs():
   new_start_date=find_new_reports(start_date)
   logger.info("Mail: BS Found %s new reports after scrapping",len(recent_table))
   print_table(recent_table,logger)
-  cdets=check_if_present(recent_table)
+  cdets=check_if_present(recent_table,"bs")
   logger.info("Mail: BS Found %s reports for adding to db",len(cdets))
   print_table(cdets,logger)
   db.insert_into_database(cdets,"bs")
