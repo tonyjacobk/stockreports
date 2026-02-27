@@ -1,6 +1,9 @@
 from pypdf import PdfReader
 import re
 import requests
+import logging
+logger = logging.getLogger(__name__)
+
 def download_file(url):
  try:
         response = requests.get(url, stream=True)
@@ -18,6 +21,36 @@ def download_and_return_text(url):
  reader = PdfReader("tempfile")
  page = reader.pages[0]  # Access the first page
  return(page.extract_text())
+
+def return_text(file_path,num_words):
+
+    try:
+        # Create a PdfReader object
+        reader = PdfReader(file_path)
+        full_text = ""
+        
+        # Iterate through all pages to get the full text
+        for page in reader.pages:
+            full_text += page.extract_text()
+            
+            # If we've already extracted enough text, we can stop
+            # and process what we have.
+            if len(full_text.split()) >= num_words:
+                break
+        
+        # Split the full text into a list of words
+        words = full_text.split()
+        
+        # Take only the first `num_words` from the list
+        first_n_words = " ".join(words[:num_words])
+        
+        return first_n_words
+        
+    except FileNotFoundError:
+        return f"Error: The file '{file_path}' was not found."
+    except Exception as e:
+        return f"An error occurred: {e}"
+
 
 def find_rating_from_file():
  reader = PdfReader("tempfile")
@@ -161,3 +194,95 @@ def get_data_and_recomm_icicid(url):
  except Exception as e:
   print("Could not get from :",url)
   print(str(e))
+
+def generic_target_price(text):
+ pattern = re.compile(
+    r"""(?ix)
+    \b(?:TP|Target\s+Price|Price\s+Target|PT)\b         # TP or Target Price
+    \s*
+    (?:to\s+)?                        # allow 'to'
+    (?:[:\-–—]\s*)?
+    (?:of\s+)?                        # allow 'of'
+    (?:[:\-–—]\s*)?
+    (?:(Rs\.?|INR|₹))?\s*             # currency optional (allow attached)
+    ((?:\d{1,3}(?:,\s?\d{3})*|\d+))      # capture number with or without commas
+    """
+ )
+ m = pattern.search(text)
+ if m:
+   return re.sub(r"[ ,]","",m.group(2))
+ else:
+   return ""
+
+def generic_recommendation(text):
+ RATINGS = [
+    "buy", "sell", "reduce", "hold","add",
+    "accumulate", "neutral", "initiating coverage","initiate covereage"
+]
+
+# Build alternation pattern (longest first to avoid partial matches)
+ ratings_pattern = r"|".join(
+    fr"{r}" for r in sorted(RATINGS, key=len, reverse=True)
+)
+
+# Pattern 1: Upgrade/Downgrade/Reiterate → extract NEW rating only
+ upgrade_pattern = re.compile(
+    fr"""(?ix)
+        (?:upgrade[d]?|downgrade[d]?|reiterate[d]?)   # action
+         (?:\s+\w+)*
+        \s+to\s+
+        (?P<new>{ratings_pattern})                    # NEW rating
+    """
+)
+
+# Pattern 2: Direct rating lines such as "Rating: BUY", "Rating – Hold"
+ direct_pattern = re.compile(
+    fr"""(?ix)
+        (?:
+            rating\s*[:\-–—]?\s*(?P<rate1>{ratings_pattern})      # Rating: BUY
+            |
+            (?P<rate2>{ratings_pattern})\s+rating                 # BUY rating
+            |
+            (?:maintain|maintains|maintained
+              |retain|retains|retained
+              |reiterate|reiterates|reiterated
+              |recommend|recommends
+              |reaffirm|reaffirms|reaffirmed)
+
+            \s+(?:a\s+)?(?P<rate3>{ratings_pattern})              # maintain HOLD / maintain a BUY
+        )
+    """
+)
+
+
+    # 1. Check upgrade/downgrade type
+ m1 = upgrade_pattern.search(text)
+ if m1:
+        return m1.group("new").upper()
+
+    # 2. Check direct rating
+ m2 = direct_pattern.search(text)
+ if m2:
+  for key in ("rate1", "rate2", "rate3"):
+         if m2.group(key):
+             return m2.group(key).upper()
+ return None
+
+def get_target_and_recomm(url,count=500):
+ print("Downloading from ...",url)
+ try:
+  download_file(url)
+ except  Exception as e:
+    logger.info("Could not download from URL %s",url)
+    return "",""
+ text=return_text("tempfile",count)
+ recomm=generic_recommendation(text)
+ target=generic_target_price(text)
+ return recomm,target
+"""
+
+recomm=generic_recommendation(text)
+target=generic_target_price(text)
+print(recomm, target) 
+
+"""

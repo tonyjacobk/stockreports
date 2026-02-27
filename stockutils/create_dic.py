@@ -41,6 +41,7 @@ def create_name_dictionary():
    add_company_to_dict(name,key)   
 
 def find_correct_company_from_list(raw_name,comp_list):
+ print(raw_name,comp_list)
  for i in comp_list:
     i[0]=i[0].replace("&"," And ")
     i[0]=preprocess_text(i[0])
@@ -55,7 +56,10 @@ def find_correct_company_from_list(raw_name,comp_list):
         for ss_i, x_i in zip(ss, x[0].lower().split())
     )
 ]
-
+ if len(result) >1:
+     result1=result
+     result=[min(result1, key=lambda x: len(x[0].split()))]
+     logger.info("Found Multiple companies, %s chose %s for company Name %s",result1 , result,raw_name)
  return (result)
 
 def combine_single_letters(input_str):
@@ -163,6 +167,8 @@ def misc_check_company(input_string):
         return ['National Aluminium Company Limited','NATIONALUM']
     elif  input_lower.startswith("oil and natural"):
         return ['Oil & Natural Gas Corporation Limited','ONGC']
+    elif input_lower.startswith("five star business"):
+        return ["Five-Star Business Finance Limited","FIVESTAR"]
     else:
         return []
 
@@ -185,6 +191,7 @@ def find_company_easy(raw_name):
   if len(name_list)==0:
       return -1,None
   p=find_correct_company_from_list(raw_name,name_list)
+  print("hello",p)
   if len(p)==0:
        return -1,None
   if len(p) == 1:
@@ -213,23 +220,26 @@ def combine_single_letter_and_check(raw_name):
 
 
 def find_company(raw_name_i):
+ print(raw_name_i)
  raw_name=raw_name_i.replace("&", " And ")
  raw_name=preprocess_text(raw_name) # removes the, . becomes space , Multiple spaces and special chars removed 
  print ("After Preprocess",raw_name)
  raw_name=combine_single_letters(raw_name)
  ret,val=find_company_easy(raw_name)
- if ret!=-1:
+ if ret==0:
      return ret,val
  val= misc_check_company(raw_name)
- print(val,"After Misc")
+ print(val,"After Misc",val)
  if val:
      return 0,val
  else:
    ret,val=combine_single_letter_and_check(raw_name)
+   print ("After combine_single_letters",ret,val)
    if ret==0:
     return ret,val
    else:
     ret,val=check_for_name_with_special_char(raw_name_i)
+    print("After check_for_name_with_special_char", ret,val)
     if ret==0:
         return ret,val
     else:
@@ -240,8 +250,16 @@ def check_for_name_with_special_char(raw_name):
    check=all(c.isalnum() or c == '.' for c in first_name)
    if  check :
        return -1,[]
-   name_list=name_dict.get(first_name.upper())
-   p=find_correct_company_from_list(preprocess_text(raw_name),name_list)
+   replaced_name=re.sub(r'[^a-zA-Z0-9.]+', ' ', first_name)
+   print ("Replaced Name",replaced_name)
+   first_part=replaced_name.split()[0]
+   print ("Trying with ",first_part)
+   name_list=name_dict.get(first_part.upper())
+   if not name_list:
+       print("Could not find any name after replacing special chars with space")
+       return -1,[]
+   p=find_correct_company_from_list(replaced_name,name_list)
+   print("hello",p)
    if len(p)==0:
        return -1,None
    if len(p) == 1:

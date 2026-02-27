@@ -1,5 +1,5 @@
 import pymysql
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 import logging
 import contvar
 import re
@@ -30,6 +30,49 @@ class DBClient:
   write_timeout=timeout,
 )
   return connection
+
+
+ def broker_company_reports_in_last_few_days(self,days,nsecode,broker,date1):
+  start_date = date1 -timedelta(days=days)
+  end_date = date1 + timedelta(days=days)
+  print("NseCode: "+nsecode+" Broker: "+broker)
+  print (date1)
+  query = """
+        SELECT company, NSEKEY, broker, URL, recommendation, target, report_date, site
+        FROM reports
+        WHERE NSEKEY = %s
+          AND broker = %s
+          AND report_date BETWEEN %s AND %s
+    """
+
+  self.cursor.execute(query, (nsecode,broker,start_date,end_date)) 
+  results=self.cursor.fetchall()
+  return results
+
+ def get_last_n_day_data(self,days,date1):
+  print("getting N days data",days)
+  start_date = date1 -timedelta(days=days)
+  end_date = date1 + timedelta(days=days)
+  query="""
+        SELECT NSEKEY, broker, URL 
+        FROM reports
+        wHERE report_date BETWEEN %s AND %s
+    """
+  self.cursor.execute(query, (start_date,end_date))
+  results=self.cursor.fetchall()
+  return results
+
+ def get_last_ndays_sector_data(self,days,date1):
+  start_date = date1 -timedelta(days=days)
+  end_date = date1 + timedelta(days=days)
+  query="""
+        SELECT company 
+        FROM gen_reports
+        wHERE report_date BETWEEN %s AND %s
+    """
+  self.cursor.execute(query, (start_date,end_date))
+  results=self.cursor.fetchall()
+  return results
 
 
 
@@ -106,6 +149,8 @@ class DBClient:
      logger.info("testrundb=1 .. Will not be saving to DB")
      return
   logger.info("Adding reports from %s into DB",site)
+  print("Data list",data_list)
+
   try:
  # Establish a connection
    mysql_data_str=""  
@@ -121,7 +166,8 @@ class DBClient:
      realname=data['Company']
      code="SECTOR"
     else:
-     realname,code=get_comp_code( data['Company'])
+     realname=data['Company']
+     code=data['code']
  # Prepare data for insertion
     insert_data = (
     realname,
@@ -150,7 +196,24 @@ class DBClient:
    logger.error("Could not add this report %s",insert_data)
    logger.error("Something went wrong: %s",str(err))
 
-
+ def insert_into_sector(self,datalist):
+  if contvar.testrundb==1 :
+     logger.info("testrundb=1 .. Will not be saving to DB")
+     return
+  for data in datalist:
+   insert_data = (
+    data["company"],
+    data['broker'],
+    data['link'],
+    data['report-date'],
+    data['site']
+ )
+   query = ("INSERT IGNORE INTO gen_reports  (company,  broker, URL,report_date, site) "
+ "VALUES (%s, %s, %s, %s, %s)")
+   self. cursor.execute(query, insert_data)
+   self.conns.commit()
+   print("Data inserted successfully.")
+ 
  def insert_into_codedb(self,comp_name, code):
   logger.info("Adding reports from %s into DB %s  %s",comp_name,code)
   try:

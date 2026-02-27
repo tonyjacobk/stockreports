@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-brk_dict={"IDBI":"./cntrfiles/idbi.txt","Axis":"./cntrfiles/axis.txt","geojit":"./cntrfiles/geojit.txt"}
+brk_dict={"IDBI":"./cntrfiles/idbi.txt","Axis":"./cntrfiles/axis.txt","geojit":"./cntrfiles/geojit.txt","vent":'./cntrfiles/ventura.txt',"shkhan":'./cntrfiles/shkhan.txt',"hdfc":'./cntrfiles/hdfc.txt',"dolat":"./cntrfiles/dolat.txt"}
 
 def read_first_line(filename):
     try:
@@ -16,6 +16,7 @@ def read_first_line(filename):
         return f"An error occurred: {e}"
 
 def write_first_line(filename, text):
+    print (filename,text, "to be written")
     if contvar.testruncn==1:
         logger.info("testruncn=1,Not saving ..")
         return

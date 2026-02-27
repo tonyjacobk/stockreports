@@ -87,6 +87,17 @@ class CodeClient:
     result = cursor.fetchone()
     print(result)
     total_rows = result[0]
-    print(total_rows) 
+    print(total_rows)
+ def check_for_comp_partial(self,comp):
+    search_term=f"%{comp}%"
+    query = f"""
+            SELECT *
+            FROM codes
+            WHERE company LIKE %s
+           """
+    self.cursor.execute(query, (search_term))
+    result = self.cursor.fetchone()
+    return(result)
+
 
 coddb=CodeClient()
