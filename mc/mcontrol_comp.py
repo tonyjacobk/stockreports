@@ -66,14 +66,68 @@ def get_pdf(soup):
     return None 
     
 
+
+def extract_relatedstory_href(soup: BeautifulSoup) -> str | None:
+    """
+    Finds div with id starting with 'relatedstories',
+    then finds the next <p> tag and extracts href from it
+    """
+    div = soup.find("div", id=lambda x: x and x.startswith("relatedstories"))
+    if not div:
+        return None
+
+    p_tag = div.find_next("p")
+    if not p_tag:
+        return None
+
+    a_tag = p_tag.find("a", href=True)
+    if not a_tag:
+        return None
+
+    return a_tag["href"]
+
+from bs4 import BeautifulSoup
+
+def get_href_from_p_above_readmore(soup: BeautifulSoup):
+    """
+    Finds the first href inside the <p> tag immediately above
+    the element with id='readmoredivarticle'
+    """
+    readmore_div = soup.find(id="readmoredivarticle")
+    if not readmore_div:
+        return None
+
+    # Find the nearest <p> above this div
+    p_tag = readmore_div.find_previous("p")
+    if not p_tag:
+        return None
+
+    # Find the first <a> inside the <p>
+    a_tag = p_tag.find("a", href=True)
+    if not a_tag:
+        return None
+
+    return a_tag["href"]
+
 def get_real_url(url):
-# Get the Beautiful Soup object
   soup = get_moneycontrol_article_content(url)
   nurl=None
   if soup:
-    nurl= get_pdf(soup) 
+    nurl= get_href_from_p_above_readmore(soup)
   else:
     logger.error("Failed to get or parse the webpage. %s",url)
   if not nurl :
-    nurl=url
-  return (nurl)  
+    nurl=find_all_moneycontrol_image_hrefs(soup)[-1]
+  if not nurl:
+     nurl=url
+     logger.error("Mail Failed of extract PDF in MC %s",url)
+  return (nurl)
+
+
+def find_all_moneycontrol_image_hrefs(soup):
+    prefix = "https://images.moneycontrol.com/static-mcnews"
+    return [
+        a["href"]
+        for a in soup.find_all("a", href=True)
+        if a["href"].startswith(prefix)
+    ]
