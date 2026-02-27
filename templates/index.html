@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Manager</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .header { 
+            position: sticky; top: 0; background: white; padding: 15px 30px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; margin-left: 10px; }
+        .save-btn { background-color: #28a745; }
+        .db-btn { background-color: #007bff; }
+        
+        .entry-card { background: white; padding: 20px; margin: 20px auto; border-radius: 8px; border: 1px solid #ddd; width: fit-content; }
+        .field-row { display: flex; gap: 12px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .field { display: flex; flex-direction: column; }
+        .checkbox-field { flex-direction: row; align-items: center; gap: 5px; padding-bottom: 10px; }
+        
+        label { font-size: 11px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .analysis-text {
+            font-family: 'Courier New', monospace; font-size: 14px;
+            border: 1px solid #ccc; padding: 10px; resize: none; line-height: 1.2;
+        }
+        .flash-msg { padding: 10px; background: #d4edda; margin-bottom: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<form action="/process" method="post">
+    <div class="header">
+        <h2 style="margin:0;">Analysis Workflow</h2>
+        <div>
+            <button type="submit" name="action" value="save_file" class="btn save-btn">SAVE TO FILE</button>
+            <button type="submit" name="action" value="update_db" class="btn db-btn">UPDATE DB</button>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}{% if messages %}{% for m in messages %}
+        <div class="flash-msg">{{ m }}</div>
+    {% endfor %}{% endif %}{% endwith %}
+
+    {% for entry in entries %}
+    <div class="entry-card">
+        <div class="field-row">
+            <div class="field"><label>ID</label><input type="text" name="id" value="{{ entry.id }}" readonly size="5"></div>
+            
+            <div class="field checkbox-field">
+                <input type="checkbox" name="delete_{{ entry.id }}" {% if entry.delete %}checked{% endif %}>
+                <label style="margin:0; color:red;">DELETE</label>
+            </div>
+            <div class="field checkbox-field">
+                <input type="checkbox" name="sector_{{ entry.id }}" {% if entry.sector %}checked{% endif %}>
+                <label style="margin:0; color:blue;">SECTOR</label>
+            </div>
+
+            <div class="field">
+                <label>Broker</label>
+                <select name="broker">
+                    {% for b in brkrs %}<option value="{{ b }}" {% if b == entry.broker %}selected{% endif %}>{{ b }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field"><label>Company</label><input type="text" name="company" value="{{ entry.company or '' }}"></div>
+            <div class="field"><label>Date</label><input type="date" name="date" value="{{ entry.date or '' }}" size="10"></div>
+            <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value="{{ entry.recommendation or '' }}"></div>
+            <div class="field"><label>Target</label><input type="text" name="target_price" value="{{ entry.target_price or '' }}" size="8"></div>
+            <div class="field"><label>Link</label><input type="url" name="link" value="{{ entry.link or '' }}"></div>
+        </div>
+        <div class="field">
+            <label>Text (160 Chars)</label>
+            <textarea name="text" class="analysis-text" rows="4" cols="200" readonly>{{ entry.text }}</textarea>
+        </div>
+    </div>
+    {% endfor %}
+</form>
+
+</body>
+</html>
