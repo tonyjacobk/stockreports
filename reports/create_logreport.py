@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-
+from tele_tables import get_all_tables
 def parse_log_file(log_file):
     log_lines=open(log_file,"r")
     shareindia_data = {
@@ -20,7 +20,11 @@ def parse_log_file(log_file):
     code_db_added = []  # For "Added to Code DB" entries
     code_db_failed = []  # For "Could not add to code DB" entries
     check_date = None
-    not_added=[]     
+    not_added=[] 
+    already_present=re.compile(
+    r'^Mail broker\s+(?:.+?)\s+and\s+NSEKEY\s+(?:.+?)\s+present in DB with URL$',
+    re.IGNORECASE
+)
     for line in log_lines:
         # Extract the check date from any source line
         if 'Searching for reports newer than' in line and not check_date:
@@ -67,7 +71,7 @@ def parse_log_file(log_file):
                     smifs_data['Results'] = int(match.group(1))
         
         # Source data parsing (MC, BS, etc.)
-        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct)', line):
+        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct|Dolat|Ventura Securities|HDFC Sec)', line):
             source_match = re.search(r'Mail: (\w+)', line)
             date_match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
             found_match = re.search(r'Found (\d+) new reports', line)
@@ -120,12 +124,12 @@ def parse_log_file(log_file):
                     'name': company_name,
                     'code': 'N/A'
                 })
-        elif 'Mail:Not adding' in line:
+        elif "Mail:Not adding" in line:
           not_added.append(line)
                
     return shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added
 
-def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added):
+def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added,morning,summary,huge):
     current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     html = f"""
@@ -304,6 +308,9 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
 
     html += """
     </table>
+"""
+    html += morning+summary+huge
+    html += """ 
 </body>
 </html>
 """
@@ -314,5 +321,6 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
 # Example usage with the log lines including MC data and code DB entries
 def get_report():
  shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added = parse_log_file("/tmp/maillog")
- html_output = generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added)
+ huge,summary,morning=get_all_tables()
+ html_output = generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added, code_db_failed, check_date,not_added,morning,summary,huge)
  return(html_output)

@@ -25,10 +25,15 @@ def upload_file(src,dest):
     return False
 
 def upload_log():
+ print("In upload log")
  dat=datetime.datetime.now().date()
  fname="log"+str(dat)
  c=upload_file('/tmp/myapp.log',fname)
- if c:
+ mname="morning"+str(dat)
+ c1=upload_file('/tmp/morntele.log',mname)
+ aname="analysis"+str(dat)
+ c2=upload_file('/tmp/telgram.log',aname)
+ if c and c1 and c2:
      sys.exit(0)
  else:
      sys.exit(1)

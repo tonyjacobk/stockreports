@@ -33,8 +33,8 @@ if __name__ == "__main__":
     # Example usage
     smtp_server = "in-v3.mailjet.com"
     port =587
-    log_email = "4c1f5307575c5bf397b35db5348767b1"
-    password = "f623b20bfb0b61507edc6ed3ff832e07"  # 🔑 replace with your actual password
+    log_email = "ab9fbf01d4626bcfeab77924c30bf4c6"
+    password = "b864cbfdcb6b8e2c0c09a9f49f081078"  # 🔑 replace with your actual password
     recipient_email = "tonyjacobk@gmail.com"
     sender_email="tonyjacob@hotmail.com"
     try:

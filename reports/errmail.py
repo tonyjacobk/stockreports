@@ -13,8 +13,8 @@ def find_error_context(file_path, target_word="error"):
     for i, line in enumerate(lines):
         if target_word_lower in line.lower():
             current = line.strip()
-            above = lines[i - 1].strip() if i > 0 else None
-            below = lines[i + 1].strip() if i + 1 < len(lines) else None
+            above = lines[i - 1].strip() if i > 0 else " "
+            below = lines[i + 1].strip() if i + 1 < len(lines) else " "
 
             # Skip if error line matches and above line matches any skip pattern
             if (
@@ -35,4 +35,6 @@ def create_error_report():
       rep=rep+y+"\n"
       rep=rep+z+"\n"
       rep=rep+"********************************************************************************************"+"\n"
-     return(rep)    
+     return(rep) 
+c=create_error_report()
+print(c)
