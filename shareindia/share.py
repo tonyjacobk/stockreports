@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from stockutils import read_first_line,write_first_line
+from stockutils import read_first_line,write_first_line,add_codes_to_reports,remove_quarterlyinfo,get_target_and_recomm
 from stockutils import print_table,db
 import logging 
 logger = logging.getLogger(__name__)
@@ -37,6 +37,10 @@ def get_reports(lastdate,ids,reps):
         a_tag = row.find('a')
         if a_tag:
          k["link"] = a_tag['href'] 
+         recomm,target=get_target_and_recomm(k["link"])
+         print(recomm,target,"RRTTT")
+         k['target']=target
+         k["recommendation"]=recomm
         else:
           logger.error ("Could not find href under %s  %s",ids,row)
           continue
@@ -56,7 +60,7 @@ def get_reports(lastdate,ids,reps):
         # Extract <h5> tag
         h5_tag = row.find('h5')
         if h5_tag:
-         k['Company'] = h5_tag.get_text(strip=True) 
+         k['Company'] = remove_quarterlyinfo(h5_tag.get_text(strip=True))
         else:
          logger.error ("Could not find Company under %s %s",ids,row)
          continue
@@ -76,7 +80,7 @@ def ishare_main():
  nlastdate=lastdate
  print ("Inside ",lastdate)
  read_page()
- for i in ['tab-content-long-term-stock','tab-content-short-term-stock','tab-content-thematic-stocks','tab-content-special-reports']:
+ for i in ['tab-content-long-term-stock','tab-content-short-term-stock','tab-content-thematic-stocks','tab-content-special-reports','tab-content-management-meet-note','tab-content-result-update']:
   nlast_date=None
   nlast_date=get_reports(lastdate,i,reps)
   logger.info ("Mail: Shareindia After %s total new reports %s",i,len(reps))
@@ -85,10 +89,13 @@ def ishare_main():
     nl=datetime.strptime(nlast_date,"%B %d, %Y")
     nlastdate= nl if nl>nlastdate else nlastdate
  write_first_line('./cntrfiles/shareindia.txt', nlastdate.strftime('%Y-%m-%d')) 
+ add_codes_to_reports(reps)
+ write_first_line('./cntrfiles/shareindia.txt', nlastdate.strftime('%Y-%m-%d'))
  logger.info("Final list of reports from ShareIndia %s",len(reps))
  print_table(reps,logger)
  db.insert_into_database(reps,"shareindia")
  nlast_string=datetime.strftime(nlastdate,"%Y-%m-%d")
+
  write_first_line("./cntrfiles/shareindia.txt",nlast_string)
  return (reps)
 
@@ -96,5 +103,5 @@ def share_main():
  try:
    return( ishare_main())
  except Exception as e:
-   logger.error ("ShareIndia issue {e}")
+   logger.error ("ShareIndia issue {e}",exc_info=True)
   

@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import datetime
 from stockutils import read_first_line,write_first_line,get_target_price,get_recomm_and_target
-from stockutils import print_table,db
+from stockutils import print_table,db,add_codes_to_reports
 import logging
 import urllib.parse
 logger = logging.getLogger(__name__)
@@ -141,6 +141,7 @@ def smifs_main():
     print_table(smifs_results,logger)
 
     latest=max([nldate1,nldate2,nldate3])
+    add_codes_to_reports(smifs_results)
     db.insert_into_database(smifs_results,"smifs")
     write_first_line('./cntrfiles/smifs.txt', latest.strftime("%B %d, %Y"))
    except Exception as e:
