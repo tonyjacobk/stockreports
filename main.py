@@ -7,9 +7,13 @@ from mc import main_mc
 from shareindia import share_main
 from smifs import smifs_main
 import logging
+from stockutils import get_last_ndays_data
 logger = logging.getLogger(__name__)
 reports=["smifs","mc","bs","share"]
 #reports=["mc"]
+
+days=8
+
 
 def initialize_logger ():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename='/tmp/myapp.log', level=logging.INFO)
@@ -17,13 +21,15 @@ def initialize_logger ():
 def add():
   initialize_logger()
   if "mc" in reports:
+    get_last_ndays_data(days)
     main_mc()
   if "bs" in reports:
-    scrape_bs()
-    main_bs()
+    ret=scrape_bs()
+    if ret!=-1:
+      get_last_ndays_data(days)  
+      main_bs()
   if "share" in reports:
       share_main()
   if "smifs" in reports:
       smifs_main()
-
 add()

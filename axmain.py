@@ -7,7 +7,7 @@ from idb import idbi_main
 from icicid import icici_main
 import logging
 logger = logging.getLogger(__name__)
-#reports=["icicid"]
+#reports=["idbi"]
 reports=["raxis","geojit","idbi","icicid"]
 def initialize_logger ():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename='/tmp/myapp.log', level=logging.INFO)
