@@ -10,7 +10,6 @@ from nsecodeagent import call_report_agent
 from .check import extract_needed_texts
 import json
 import logging
-from .mylist import plist
 logger = logging.getLogger(__name__)
 
 
