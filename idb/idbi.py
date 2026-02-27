@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 from datetime import datetime
 from stockutils import get_last_report_date,update_last_report_date
-from stockutils import db,print_table
+from stockutils import db,print_table,add_codes_to_reports
 from stockutils import get_target_price_recomm_idbi
 import logging
 logger = logging.getLogger(__name__)
@@ -130,10 +130,21 @@ def get_all_reports(oldDate):
 def idbi_main():
    start_date=get_last_report_date("IDBI") 
    reps= get_all_reports(start_date)
+   last_date=start_date
+   if len(reps) > 0:
+      last_date=reps[0]['report-date']
    add_target_and_recomm(reps) 
-   logger.info("Mail: IDBI Found %s new reports after scrapping",len(reps))
+   sector=[]
+   for i in range(len(reps) - 1, -1, -1):
+     if not  reps[i]['RR']  :
+       nrow={'company':reps[i]['Company'],'broker':reps[i]['broker'],'link':reps[i]['link'],'report-date':reps[i]['report-date'],'site':'idbi'}
+       sector.append(nrow)
+       reps.pop(i)
+   logger.info("Mail: IDBI Found %s new reports after scrapping",len(reps)+len(sector))
+   logger.info("Mail: IDBI Found %s new sector-reports after scrapping",len(sector))
    print_table(reps,logger)
+   add_codes_to_reports(reps)
    db.insert_into_database(reps,"idbi")
-   if len(reps) >0:
-     last_date=reps[0]['report-date']
+   db.insert_into_sector(sector)
+   if len(reps)+len(sector) >0:
      update_last_report_date("IDBI",last_date)
