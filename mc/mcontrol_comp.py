@@ -131,3 +131,4 @@ def find_all_moneycontrol_image_hrefs(soup):
         for a in soup.find_all("a", href=True)
         if a["href"].startswith(prefix)
     ]
+
