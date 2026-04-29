@@ -126,7 +126,7 @@ def beat_main():
  
  global daily_ids,company_ids
  try:
-  get_last_ndays_data(15)
+  get_last_ndays_data(20)
   logger.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   loop = asyncio.get_event_loop()
   loop.run_until_complete(read_daily())
@@ -141,6 +141,5 @@ def beat_main():
   print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
   traceback.print_exc()
  finally:
-  write_dicts_to_file(daily_ids,"dailyids.txt")
   print(pdftext)
   write_text_to_file(pdftext,"pdfanalysis")
