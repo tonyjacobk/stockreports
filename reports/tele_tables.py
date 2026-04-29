@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
-
+report="/tmp/telg.log"
 def generate_morning_log_report():
-    log_path = '/tmp/morntele.log'
+    log_path = report
     
     # Get today's date in YYYY-MM-DD format
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -23,7 +23,9 @@ def generate_morning_log_report():
         'compres':0,
         'IPO':0,
         'strategy':0,
-        'econ':0
+        'econ':0,
+        'File too huge':0,
+        'othcomp':0
     }
 
     if not os.path.exists(log_path):
@@ -36,7 +38,7 @@ def generate_morning_log_report():
             if today_str in line:
                 for word in keyword_counts.keys():
                   tword=word
-                  if word not in["already present","Report date"] :
+                  if word not in["already present","Report date", 'File too huge'] :
                       tword="is of type "+word
                   if tword in line:
                         keyword_counts[word] += 1
@@ -55,8 +57,10 @@ def generate_morning_log_report():
     strategy     = keyword_counts['strategy']
     daily        = keyword_counts['daily']
     ipo          = keyword_counts['IPO']
+    othcomp      = keyword_counts['othcomp']
     econ         = keyword_counts['econ']
-    useful       =thematic+others+compbrok+compres+onreport+sector
+    huge         = keyword_counts['File too huge']
+    useful       =thematic+others+compbrok+compres+onreport+sector+othcomp
     # Generate HTML Table
     html_table = f"""
     <h3>Morning Summary: {today_str}</h3>
@@ -79,6 +83,7 @@ def generate_morning_log_report():
         <tr><td style="padding: 8px;">IPO</td><td>{ipo}</td></tr>
         <tr><td style="padding: 8px;">Economy</td><td>{econ}</td></tr>
         <tr><td style="padding: 8px;">Company Results</td><td>{compres}</td></tr>
+        <tr><td style="padding: 8px;">Huge</td><td>{huge}</td></tr>
         <tr><td style="padding: 8px;">Useful Reports</td><td>{useful}</td></tr>
     </table>
     """
@@ -89,7 +94,7 @@ def generate_morning_log_report():
 from datetime import date
 import html
 
-def get_analysis_report(log_file="/tmp/telgram.log"):
+def get_analysis_report(log_file="/tmp/telg.log"):
     """
     Reads the telegram log file and returns:
     1) HTML table with all 'File too huge ..' lines
@@ -104,7 +109,7 @@ def get_analysis_report(log_file="/tmp/telgram.log"):
     duplicate=0
     comprep=0
     huge_lines = []
-
+   
     with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             if today not in line:
@@ -122,7 +127,7 @@ def get_analysis_report(log_file="/tmp/telgram.log"):
             if "File too huge .." in line:
                 toohuge += 1
                 huge_lines.append(line.strip())
-
+    accounted=comprep+duplicate+analysis+sector
     # -------- Table 1: Huge lines --------
     huge_table = """
     <table border="1" cellpadding="5" cellspacing="0">
@@ -159,10 +164,6 @@ def get_analysis_report(log_file="/tmp/telgram.log"):
             <td>{analysis}</td>
         </tr>
         <tr>
-            <td>Too Huge</td>
-            <td>{toohuge}</td>
-        </tr>
-        <tr>
             <td>Duplicate Company Report</td>
             <td>{duplicate}</td>
         </tr>
@@ -170,13 +171,18 @@ def get_analysis_report(log_file="/tmp/telgram.log"):
             <td>New Company Report</td>
             <td>{comprep}</td>
         </tr>
+        <tr>
+            <td>Reports Accounted </td>
+            <td>{accounted}</td>
+        </tr>
+
     </table>
     """
 
     return huge_table, summary_table
 
 def get_all_tables():
-    huge,summary=get_analysis_report()
+    huge,summary=get_analysis_report(report)
     morning=generate_morning_log_report()
     return huge,summary,morning
 
