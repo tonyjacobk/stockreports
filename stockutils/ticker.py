@@ -1,6 +1,6 @@
 import requests
 from typing import Tuple,List,Dict,Optional
-from .nse_utils import nse
+from nse_utils import nse
 import re
 import logging
 logger = logging.getLogger(__name__)
@@ -9,11 +9,11 @@ def choose_only_equity_instruments(datalist):
       filtered_list = []
       for entry in datalist:
         # Check if it's an equity entry
-        if entry.get('result_sub_type') == 'equity':
-            symbol_info = entry.get('symbol_info', '').lower()
+        if entry.get('segment') == 'in equity':
+    #        symbol_info = entry.get('symbol_info', '').lower()
             # Exclude if it's a Mutual Fund or ETF
-            if 'mutual fund' not in symbol_info and 'etf' not in symbol_info:
-                filtered_list.append(entry)
+     #       if 'mutual fund' not in symbol_info and 'etf' not in symbol_info:
+               filtered_list.append(entry)
       return filtered_list
 
    
@@ -50,6 +50,7 @@ def remove_inactive_symbols(symbol_data):
 def extended_tests(symbols: List[Dict]) -> Optional[Dict]:
       if not symbols:
         return None
+      """
       symbols=choose_only_equity_instruments(symbols)
       print ("After Equity",symbols)
       if not symbols:
@@ -61,13 +62,11 @@ def extended_tests(symbols: List[Dict]) -> Optional[Dict]:
       if not symbols:
         return None
       if len(symbols) == 1:
-        return symbols
+        return symbols """
       symbols=remove_PP_and_RE(symbols)
       print ("PP RE Removed",symbols)
       if not symbols:
         return None
-      if len(symbols) == 1:
-        return symbols
       return symbols               
  
 
@@ -76,14 +75,14 @@ def process_list(clist,company):
     if not clist:
            return -1,None
     if len(clist)==1 :
-      ret,val=is_this_same_company(company,clist[0]['symbol_info'],clist[0]['symbol'])
+      ret,val=is_this_same_company(company,clist[0]['companyName'],clist[0]['symbol'])
       if ret:
           return 0,clist
       return -1,None
     new_list=[]
     for item in clist:
-        ret,val=is_this_same_company(company,item['symbol_info'],item['symbol'])
-        print ( ret,val,company,item['symbol_info'],"same comp")
+        ret,val=is_this_same_company(company,item['companyName'],item['symbol'])
+        print ( ret,val,company,item['companyName'],"same comp")
         if ret:
             new_list.append(item)
     print (new_list,"Search over")        
@@ -127,7 +126,7 @@ def find_best_match(nse_list):
       smallest=[]
       small_len=100 ## A big number ##
       for item in nse_list:
-        nse_name=item['symbol_info']
+        nse_name=item['companyName']
         cleaned=re.sub(r'[^a-zA-Z0-9\s]', '', nse_name).lower()
         cleaned_list=cleaned.split()
         clist=[word for word in cleaned_list if word != 'the']
@@ -140,7 +139,7 @@ def find_best_match(nse_list):
       return  smallest
 
 def ask_for_help(text,best):
-        logger.error("NSE:Multiple options for ",text ,best)
+        logger.error("NSE:Multiple options for %s %s",text ,best)
         print ("Confusion ",text ,best)
 
 def expand_short_forms(raw_name: str) -> str:
@@ -157,8 +156,7 @@ def expand_short_forms(raw_name: str) -> str:
         'engg.':'Engineering'
     }
 
-    pattern = r'\b(corpn|ltd|amc|sez|inds|gsk)\b|(?i)hind\.|(?i)engg\.|(?i)intl\.|(?i)natl\.'
-
+    pattern = r'(?i)\b(corpn|ltd|amc|sez|inds|gsk)\b|hind\.|engg\.|intl\.|natl\.'
     return re.sub(
         pattern,
         lambda m: replacements.get(m.group().lower(), m.group()),
@@ -184,14 +182,14 @@ def preprocess_text(raw_name):
 
 def remove_unwanted_keys(original_list):
  new_list = [
-    {key: value for key, value in d.items() if key in {"symbol", "symbol_info"}}
+    {key: value for key, value in d.items() if key in {"symbol", "companyName","series"}}
     for d in original_list
 ]
  return new_list
 
 def preprocess_list(comp_list):
     for i in comp_list:
-        i["symbol_info"]=preprocess_text(i["symbol_info"])
+        i["companyName"]=preprocess_text(i["companyName"])
     return (comp_list)
 
 def initials_check(complist,text):
@@ -247,8 +245,12 @@ def new_search(text: str):
             return 0,val
        if ret==0:
            return 0,val
-       best=find_best_match(val)
-       print ("Best",best)
+       best=find_best_match(val)  
+       if len(best) ==1:
+           return 0,best
+       for i in range (len(best)):
+           if best[i]['series']!="EQ":
+             best.pop(i)
        if len(best) ==1:
            return 0,best
        ask_for_help(text,best)

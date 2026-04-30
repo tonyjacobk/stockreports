@@ -1,5 +1,6 @@
 from mega import Mega
-
+import logging
+logger = logging.getLogger(__name__)
 class MegaManager:
     def __init__(self, email=None, password=None):
         """Initialize the MegaManager and log in (optionally with credentials)."""
@@ -72,4 +73,45 @@ class MegaManager:
     def get_a_link(self,node):
         return self.mega.get_link(node)
 
-MegaMan=MegaManager("tonyjacobk@gmail.com","Simansy@2022")
+    def delete_Name(self,fileName):
+      file=self.mega.find(fileName)
+      file_id=None
+      if not file:
+        print ("File details about '{fileName}' could not be found")
+        logger.info("Could not get file Object for %s",fileName)
+        return -1
+      file_id,filed = file
+      if not file_id:
+        print ("File ID for   '{fileName}' could not be found ")
+        logger.info("Could not get file_id for %s from file Object",fileName)
+        return -1
+
+      p= self.mega.delete(file_id)
+      if p==0:
+       print(f"File '{fileName}' deleted successfully.")
+       logger.info("FileName %s deleted Successfully",fileName)
+       return 1
+      return -1
+
+    def delete_url(self,myurl):
+     name=self.get_file_Name_from_url(myurl.strip())
+
+     if name:
+        logger.info("Got fileName: %s from URL: %s",name,myurl)
+        c=self.delete_Name(name)
+        return c
+     else:
+          print("Could not find file Name from this URL ",myurl)
+          logger.info("Could not get fileName for URL %s:",myurl)
+          return -2
+
+    def get_file_Name_from_url(self,URL):
+     try:
+      p= self.mega.get_public_url_info(URL)
+      return(p['name'])
+     except Exception as E:
+      print("Could not find file from this URL %s",URL)
+      return None
+
+
+MegaMan=MegaManager("tonyjacobk@gmail.com","Seemu@2002")
