@@ -272,10 +272,10 @@ def get_comp_code(name):
  if ret == -1:
    ret,val = new_search(name)
    if ret==0:
-       logger.info("Mail:Added to codeDB %s  %s",val[0]['symbol_info'],val[0]['symbol'])
-       coddb.insert_into_codedb( val[0]['symbol_info'],val[0]['symbol'])
-       add_company_to_dict(val[0]['symbol_info'],val[0]['symbol'])
-       return val[0]['symbol_info'],val[0]['symbol']
+       logger.info("Mail:Added to codeDB %s  %s",val[0]['companyName'],val[0]['symbol'])
+       coddb.insert_into_codedb( val[0]['companyName'],val[0]['symbol'])
+       add_company_to_dict(val[0]['companyName'],val[0]['symbol'])
+       return val[0]['companyName'],val[0]['symbol']
    else:
        logger.info("Mail:Could not find NSECode for %s",name)
        return name,''

@@ -10,14 +10,15 @@ class NSEClient:
         })
     def get_companies(self, query: str) ->Tuple[ int,dict]:
 
-        url = "https://www.nseindia.com/api/NextApi/search/autocomplete"
-        params = {"q": query}
+        url = "https://www.nseindia.com/api/NextApi/globalSearch/equity"
+        params = {"symbol": query}
         print ("Checking ...",query)
         try:
             response = self.session.get(url, params=params, timeout=10)
             response.raise_for_status()
             result = response.json()
-            symbols = result.get("symbols", [])
+            print(result)
+            symbols = result.get("data", [])
             return symbols
         except requests.RequestException as e:
             print(f"Request error: {e}")

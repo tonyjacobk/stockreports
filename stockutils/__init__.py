@@ -8,9 +8,9 @@ from .nse_utils import nse
 from .create_dic import find_company,get_comp_code,name_dict,key_dict
 from .ticker import new_search,check_company_with_the_key
 from .codedb import coddb
-from .codeName import get_code_and_company
+#from .codeName import get_code_and_company
 from .megclass import MegaMan
-from .aicere import ceramain
-from .misc import remove_quarterlyinfo
-from .pycron import mycrony
+#from .aicere import ceramain
+from .textutility import remove_quarterlyinfo
+#from .pycron import mycrony
 from .redis_man import res
