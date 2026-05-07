@@ -1,118 +1,110 @@
 import re
-from .tel_utils import find_broker_from_fileName,get_correct_broker_and_nsecode
-from stockutils import return_text,db,MegaMan,check_in_dbcache
-from cntrfiles import controls
-from .tel_utils import extract_target_price,extract_recommendation,remove_dates_and_quarters,preprocessName
-from .tel_utils import get_broker_and_company_for_on_reports,extract_broker_and_company_compres,extract_broker_and_company_compbrok
 from datetime import date,datetime
-from  .pdf_utils import extract_needed_texts
 import json
 import contvar
 import logging
 logger = logging.getLogger(__name__)
+from .broker_comp_finder import get_broker_and_company
+from stockutils import check_in_dbcache,db,MegaMan,check_in_sector_cache
+from .broker_specific import get_company_from_reports
+from .tel_utils import extract_target_price_and_recomm,find_broker_from_fileName,upload_mega_file,add_to_db,find_broker_from_text
+from .pdf_utils import extract_text_from_pdf
 
-
-
-def get_company_and_broker(fileName,mtype):
- comp_ds={"company":"","broker":"","code":""}
- funcdict={"compres":extract_broker_and_company_compres,"compbrok":extract_broker_and_company_compbrok,"onreport":get_broker_and_company_for_on_reports} 
- comp_ds["company"],comp_ds["broker"] =funcdict[mtype](fileName)
- get_correct_broker_and_nsecode(comp_ds)
- print("After get_correct_broker",comp_ds)
+def is_report_present(fileName,mtype):
+ comp_ds=get_broker_and_company(fileName,mtype)
+ logger.info("comd_ds in is_report_present %s",comp_ds)
  if comp_ds["cf"] and comp_ds["bf"]:
-    print("Checking duplicates")
     pr,url=check_in_dbcache(comp_ds["broker"],comp_ds["code"])
     if pr:
         return -1,comp_ds
-
+ logger.info("%s,%s not present",comp_ds["broker"],comp_ds["code"]) 
  return 1,comp_ds
 
-def download_broker_report_and_get_recomm_target(length,fname,comp_det,date):
-  text=return_text('/tmp/comp.pdf',length)
-  imptext=extract_needed_texts("/tmp/comp.pdf")
-  text=text+" "+imptext
-  if not imptext and not comp_det["cf"]:
-      return -1, None,None,text
-  print(text)
-  recomm=extract_recommendation(text)
-  tp=extract_target_price(text)
-  logger.info("Extracted Recommendation and target %s %s",recomm,tp)
-  return 1,recomm,tp,text
+def do_second_round_analysis(ds,u,fname,rep_date,reps,pdftext,messid):
+ text=extract_text_from_pdf('/tmp/comp.pdf',2000)
+ tp,recomm=extract_target_price_and_recomm(text) 
+ print("Target price , Recomm from do_second_round_analysis",tp,recomm)
+ if u=="Others":
+  retval,ds=do_second_round_for_Others(text,tp,recomm,ds)
+  print("Retval ,ds Others  After second round", retval,ds)
+ else:
+      retval,ds=classify_reports(ds,tp,recomm)
+ match retval:
+     case -1:
+         return -1,None
+     case 1:
+       row={"Company":ds["company"],"broker":ds["broker"],"recommendation":recomm,"target":tp,"report-date":rep_date,"code":ds['code']} 
+       upload_company_report_and_update_db(row,fname,reps)
+     case 2:
+         process_sector_file(fname,ds["broker"],rep_date)
+     case 3:
+           create_analyze_data(rep_date,ds,fname,messid,tp,recomm,text,pdftext)
+
+def do_second_round_for_Others(text,tp,recomm,ds):
+ needCheck=False
+ if not (ds['bf']):
+     brk=find_broker_from_text(text)
+     print("Broker is brk",brk)
+     if brk:
+         ds['broker']=brk
+         ds['bf']=True
+         needCheck=True
+ if not ds['cf'] and ds['bf'] :
+  comp,code=get_company_from_reports(ds['broker'],text)
+  if code:
+      ds['cf']=True
+      ds['code']=code
+      ds['company']=comp
+      needCheck=True
+ if ds["cf"] and ds["bf"] and needCheck:
+    print("Checking duplicates")
+    pr,url=check_in_dbcache(ds["broker"],ds["code"])
+    if pr:
+        return -1,ds # Already present 
+ ret,val= classify_reports(ds,tp,recomm)
+ return ret,val
+
+def classify_reports(ds,tp,recomm):
+ if ds['code']=="" and not( tp or recomm):  # No company Info and details --> sector
+      return 2,ds
+ if ds["code"] =="" and (tp or recomm):   # Ds code is not there but details present--> Analysis
+      return 3,ds
+ if ds['cf'] and ds["bf"] : #Broker, company  --> Add
+      return 1, ds
+ return 3,ds
 
 
-def check_report_for_dircomp(fname,comp_det,date):
-   print("+++++++++++++++++++++++++++++++++++++++++")
-   print(fname)
-   print(comp_det)
-   retval,recomm,tp,imptxt=download_broker_report_and_get_recomm_target(2000,fname,comp_det,date)
-   if retval == -1:
-    return 
-   logger.info("Extracted Recommendation and target %s %s",recomm,tp)
-   row={"Company":comp_det["company"],"broker":comp_det["broker"],"recommendation":recomm,"target":tp,"report-date":date,"code":comp_det['code']}
-   print("check_report_for_dircomp",row)
-   upload_company_report_and_update_db(row,fname)
+
+def process_sector_file(fname,brk,date):
+   if check_in_sector_cache(fname):
+       logger.info("Mail Sector file %s already present",fname)
+       return
+   if not brk:
+       brk=find_broker_from_fileName(fname)
+   upload_sector_files(fname,brk,date)
 
 
-    
-def upload_mega_file(fname):
-   link="http://mydummyfile.com"
-   if contvar.testtele==0:
-       link=MegaMan.upload_file(fname)
-   return link
 
-
-def check_the_other_report(fname,date,pdftext,messid):
-    print("*********************************************************")
-    print(fname, "File Name")
-    retval,recomm,tp,imptxt=download_broker_report_and_get_recomm_target(100,fname,{"cf":False},date)
-    brk=find_broker_from_fileName(fname+imptxt)
-    if retval==-1:
-      logger.info (" Mail %s No details available .. Classifing as sector file ",fname)
-      process_as_sector_file(fname,brk,date)
+def upload_company_report_and_update_db(row,fname,reps):
+  if {row['code'], row['broker']} in reps:
+      logger.info("Mail broker %s  and NSEKEY %s present in DB with URL %s",row['broker'],row['code'],"https://telegram/now")
       return 
+  logger.info("Mail Data to be inserted into DB %s", row)
+  link=upload_mega_file(fname)
+ # link=" https://mega.co.nz/#!GMkHWJST!5fnYP4PCRucyvCnG4vc6cJ3k6jEDisvTfsZkDx7SlyM"
+  row["link"]=link
+  reps.append(row)
+  add_to_db("comp",row)
+
+def upload_sector_files(fname,broker,date):
     link=upload_mega_file(fname)
-    datestr=date.strftime("%Y-%m-%d")
-    append_text={"id":messid,"text":fname+imptxt,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':brk}
-    pdftext.append(append_text)
-    logger.info("Need further analysis %s :",append_text)
-    return 0
-
-def process_as_sector_file(fname,broker,date):
-    print(fname, " is sector file")
-    upload_sector_file_and_update_db(fname,date,broker)
-
-
-
-
-def upload_company_report_and_update_db(row,fname):
-    logger.info("Mail Data to be inserted into DB %s", row)
-    if contvar.testtele==1:
-     logger.info("Test tele enanled .. Returning")
-     return
-    link=MegaMan.upload_file(fname)
-    if not link:
-       logger.error ("Could not obtain link .. Returning ")
-       return
-    row["link"]=link
-    rlist=[row]
-    db.insert_into_database(rlist,'tel')
-
-def upload_sector_file_and_update_db(fileName,date,brok):
-    logger.info("Trying to upload %s",fileName)
-    link=upload_mega_file(fileName)
-    date=date.strftime("%Y-%m-%d")
-    if not link:
-       logger.error ("Could not obtain link .. Returning ")
-       return
-    row=[{"broker":brok, "company":fileName,"site":"tel","link":link,"report-date":date}]
+    row=[{"broker":broker, "company":fname,"site":"tel","link":link,"report-date":date}]
     logger.info("Mail Adding to sector reports %s",row)
-    print(row)
-    if contvar.testtele==0:
-     db.insert_into_sector(row)
-     
-def upload_and_update_sector(fileName,date,desc):
-    brok=find_broker_from_fileName(desc)
-    upload_sector_file_and_update_db(fileName,date,brok)
+    add_to_db("sect",row)
 
-
-
+def create_analyze_data(date,ds,fname,messid,tp,recomm,text,pdftext) :
+   link=upload_mega_file(fname)
+   datestr=date.strftime("%Y-%m-%d")
+   append_text={"id":messid,"text":text,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
+   logger.info("Need further analysis %s :",append_text)
+   pdftext.append(append_text) 

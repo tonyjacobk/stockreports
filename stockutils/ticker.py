@@ -1,6 +1,6 @@
 import requests
 from typing import Tuple,List,Dict,Optional
-from nse_utils import nse
+from .nse_utils import nse
 import re
 import logging
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ def find_best_match(nse_list):
         cleaned=re.sub(r'[^a-zA-Z0-9\s]', '', nse_name).lower()
         cleaned_list=cleaned.split()
         clist=[word for word in cleaned_list if word != 'the']
-        print (len(clist),clist,small_len)
+        print ("find_best_match",len(clist),clist,small_len)
         if len(clist) == small_len:
             smallest.append(item)
         if len(clist) < small_len:
@@ -216,6 +216,8 @@ def check_company_with_the_key(key):
 def new_search(text: str):
        initial=False
        text=preprocess_text(text)
+       if len(text) < 2: # Single letter as name
+           return -1,[]
        print ("Preprocessed Input:", text)
        start_word = text.split()[0]
        if len(start_word) < 2:
@@ -234,11 +236,12 @@ def new_search(text: str):
        complist=preprocess_list(complist) #Removes the. Replaces non alpha , . with space and multi space with single space
        print("After pre processing",complist)
        ret,val=process_list(complist,text) ## Checks all company Names found from NSE and sees if only one matches the Name from textn
-       print("After process_list",val)       
+       print("After process_list",ret,val)       
        if ret == -1:
          if not initial: 
             return -1,[]
          ret,val=initials_check(complist,text)
+         print(ret,val,"After initials_check")
          if ret == -1:
             return -1,[]
          if ret ==0:

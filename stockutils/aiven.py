@@ -5,7 +5,6 @@ import contvar
 import re
 logger = logging.getLogger(__name__)
 from .file_utils import read_first_line
-from .create_dic import get_comp_code
 timeout = 10
 
 class DBClient:
@@ -150,7 +149,7 @@ class DBClient:
      return
   logger.info("Adding reports from %s into DB",site)
   print("Data list",data_list)
-
+  print(data_list,"From aiven")
   try:
  # Establish a connection
    mysql_data_str=""  

@@ -1,8 +1,12 @@
 from cntrfiles import controls
-from stockutils import get_comp_code
+from stockutils import get_comp_code,db,MegaMan
 import json
+import contvar
 import re
 import ast
+import logging
+logger = logging.getLogger(__name__)
+
 def find_broker_from_fileName( fname):
     for key, value in controls.brokers.items():
         if  key.lower() in fname.lower():
@@ -10,35 +14,20 @@ def find_broker_from_fileName( fname):
 
     return None
 
-def get_company_name_from_on_fileNames(fileName):
-    pattern = re.compile(
-        r'\b(?:report|notes?|update)\s+on\s+(\w+)\s+(\w+)',
-        re.IGNORECASE
-    )
-
-    match = pattern.search(fileName)
-    if match:
-        return f"{match.group(1)} {match.group(2)}"
-    return None
-
-
-def get_broker_and_company_for_on_reports(fileName):
- fileName=preprocessName(fileName)
- broker =find_broker_from_fileName(fileName)
- if not broker :
-     return None,None
- company =get_company_name_from_on_fileNames(fileName)
- if not company:
-     return None,None
- return company,broker
-
-
-def get_broker_part_from_fileName(fname):
+def find_broker_from_text( text):
     for key, value in controls.brokers.items():
-        if key.lower() in fname.lower():
-            return key
+        if " "+ key.lower() in text.lower():
+            return value
 
     return None
+
+
+
+def get_broker_key_from_broker_Name(brkNam):
+  #  key = next(k for k, v in controls.brokers.items() if v == brkNam)
+    for key, value in controls.brokers.items():
+        if " "+value.lower()+" " in brkNam.lower():
+            return key
 
 def is_direct_broker(fname):
      for i in controls.direct_brokers:
@@ -46,6 +35,7 @@ def is_direct_broker(fname):
             print(i+"  direct broker")
             return True
      return False
+
 
 def preprocessName(fname):
      # Replace _ and + with single space
@@ -64,6 +54,7 @@ def remove_dates_and_quarters(text):
         r'(?<!\d)\d{8}(?!\d)',                               # 20251105
         r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',                # 05/11/2025 etc
         r'\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b',                  # 2025-11-05
+        r'(?<!\d)\d{6}(?!\d)',                               # 260211 (YYMMDD) 
         r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s?\d{1,2}\s?\d{2,4}\b',
         r'\b\d{1,2}\s?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s?\d{2,4}\b',
         r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s?\d{2}\b',
@@ -79,7 +70,9 @@ def remove_dates_and_quarters(text):
 
     return cleaned, found
 
-
+def get_correct_nse_code(comp):
+ comp,code=get_comp_code(comp)
+ return comp,code
 
 def get_correct_broker_and_nsecode(dict_row):
   dict_row["cf"]=dict_row["bf"]=dict_row["valid"]=False
@@ -97,66 +90,50 @@ def get_correct_broker_and_nsecode(dict_row):
   if dict_row["bf"] and dict_row["cf"]:
      dict_row["valid"]=True
 
-def modify_with_correct_broker_and_nsecodes(clist):
- for i in range(len(clist)):
-  print(clist[i])
-  get_correct_broker_and_nsecode(clist[i])
- return(clist)
 
-def clean_and_convert(text: str):
-   try:
-    lines = text.strip().splitlines()
-    cleaned_lines = lines[1:-1]
-    cleaned_text = "\n".join(cleaned_lines)
-    json_text=json.loads(cleaned_text)
-    return json_text
-   except:
-    return None
+def get_correct_broker_and_nsecode_others(mylist,dict_row):
+  print("Mylist ",mylist)
+  dict_row["cf"]=dict_row["bf"]=dict_row["valid"]=False
+  for i in mylist:
+     print( "Element",i)
+     broker=find_broker_from_fileName(i)
+     print("Found broker",broker)
+     if broker:
+        dict_row['broker']=broker
+        dict_row["bf"]=True
+        code=get_broker_key_from_broker_Name(broker)
+        print(code, "Brk code")
+        if code:
+          j=i.lower().split(code.lower())
+          print(j)
+          mylist.extend(j)
+          print(mylist,"Mylist after extension")
+          mylist.remove(i)
+          print(mylist,"Mylist after removal")
+          mylist=[item for item in mylist if item != " "]
+          print(mylist)
+  for i in mylist:
+     if i.strip()=="":
+        continue
+     comp,code=get_comp_code(i.strip())
+     if code !="":
+      dict_row['company']=comp
+      dict_row["code"]=code
+      dict_row["cf"]=True
+      break
+   
 
-def get_first_two_words(text):
-    print("Two words",text)
-    if not isinstance(text, str) or not text.strip():
-        return ""
-
-    words = text.replace('_', ' ').split()
-    if len(words) ==1 :
-        return(words[0])
-    return ' '.join(words[:2])
+  return dict_row
 
 
-def extract_broker_and_company_compbrok(name):
-     print ("file name is ",name)
-     name=preprocessName(name)
-     comp={}
-     init_pattern = re.compile(r'^(.+?)Initiating Coverage on(.+)$',re.IGNORECASE)
-     sees_pattern = re.compile(r'^(.+?)sees \d+%? (?:UP|DOWN)SIDE in(.+)$',re.IGNORECASE)
 
-     init_match = init_pattern.match(name)
-     if init_match:
-       cleaned=get_first_two_words( init_match.group(2).strip("-"))
-       print("Cleaned",cleaned)
-       comp= {
-                        'broker': init_match.group(1).strip(),
-                        'company':cleaned,
-                    }
-       return  comp['company'],comp['broker']
-                # Check for sees_X%_UPSIDE_in pattern
-     sees_match = sees_pattern.match(name)
-     print("sees matched",sees_match)
-     if sees_match:
-          comp={ 'broker': sees_match.group(1).strip(),
-                 'company':get_first_two_words( sees_match.group(2).strip("_")),
-               }
 
-          print("compp is ",comp)
-          return   comp['company'],comp['broker']
-     return None,None
+def extract_target_price_and_recomm(text):
+    broker=""
+    tp=extract_target_price(text)
+    recomm=extract_recommendation(text)
+    return tp,recomm
 
-def extract_broker_and_company_compres(name):
-  brk=get_broker_part_from_fileName(name)
-  cleaned=clean_result_update_file(name,brk)
-  comp=" ".join(cleaned.split()[:2])
-  return comp,brk
    
 
 
@@ -233,24 +210,6 @@ def extract_recommendation(text):
  return None
 
 
-def remove_duplicate_files(data):
-    from collections import defaultdict
-
-    # Track occurrences per filename (list of indices)
-    filename_indices = defaultdict(list)
-    for idx, item in enumerate(data):
-        filename_indices[item["fileName"]].append(idx)
-
-    # Collect indices to remove: the *second* occurrence (i.e., index 1 in the list) if it exists
-    to_remove = set()
-    for indices in filename_indices.values():
-        if len(indices) >= 2:
-            # Remove only the *second* occurrence (indices[1])
-            to_remove.add(indices[1])
-
-    # Build result: keep items whose index is NOT in to_remove
-    result = [item for idx, item in enumerate(data) if idx not in to_remove]
-    return result
 
 def clean_result_update_file(inputfile,brk):
   cleaned = re.sub(r'[^A-Za-z0-9]', ' ', inputfile)
@@ -267,22 +226,6 @@ def clean_result_update_file(inputfile,brk):
   return cleaned
 
 
-def write_messids_to_file_json(data_list):
-    try:
-        with open("messid.txt", 'w') as file:
-            json.dump(data_list, file)
-        print(f"Successfully wrote messidlist list to ")
-    except IOError as e:
-        print(f"Error writing messid list to file")
-
-def read_messids_from_file_json(mylist):
-    try:
-        with open("messid.txt", 'r') as file:
-            mylist = json.load(file)
-        print(f"Successfully read messageid list ",len(mylist))
-    except (IOError, json.JSONDecodeError) as e:
-        print(f"Error reading file: {e}")
-        mylist=[]
 
 
 
@@ -309,9 +252,26 @@ def read_dicts_from_file(filename):
 
 
 
-def remove_already_processed_ids(messids,idlist):
-    ids_to_remove = set(idlist)
-    L3 = [entry for entry in messids if entry['messid'] not in ids_to_remove]
-    return L3
-k,l=extract_broker_and_company_compbrok("PL Capital sees 5 DOWNSIDE in Tata Elxsi-.pdf")
-print(k,l)
+
+
+def add_to_db(dbtype,row):
+     print("add to db",dbtype,row)
+     if contvar.testtele==1:
+      logger.info("Test tele enabled ..Not adding to DB Returning")
+      return
+     if dbtype=="comp":
+          print(" My add to db Comp",dbtype,row)
+          db.insert_into_database([row],'tel')
+     else:
+
+         print("Adding sector file")
+         db.insert_into_sector(row)
+
+def upload_mega_file(fname):
+   link="http://mydummyfile.com"
+   if contvar.testtele==1:
+       pass
+   else:
+       link=MegaMan.upload_file(fname)
+   return link
+
