@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for
 sys.path.append("..")
 from cntrfiles import brokers
 from stockutils import create_dic,check_if_present,db,get_last_ndays_data,res
-
+pdftext=[]
 FILE_PATH = '/home/ubuntu/stockreports/pdfanalysis'
 
 app = Flask(__name__)
@@ -27,9 +27,28 @@ def read_data(file_path):
         content = f.read().strip()
         return ast.literal_eval(content) if content else []
 
-def save_data(pdftext):
-    with open(FILE_PATH, "w", encoding="utf-8") as f:
-        f.write(repr(pdftext))
+def save_data(pdftext,Sneeded=True):
+        ndftext=[]
+        old_data=read_data(FILE_PATH)
+        text_lookup={}
+        for x in old_data:
+         print("here")
+         text_lookup[x['id']]=x['text']
+        print("text lookup size",len(text_lookup.keys()))
+        print("Size of PDftext",len(pdftext))
+        skeys=text_lookup.keys()
+        rkeys=[str(x) for x in skeys]
+        print(rkeys)
+        for item in pdftext:
+             print("PDFtext id is ",item['id'])
+             if item['id'].strip() in rkeys:
+                 print ("Found")
+                 item['text']=text_lookup[item['id']]
+                 print ("Item is ",item)
+                 ndftext.append(item)
+        if Sneeded:         
+          with open(FILE_PATH, "w", encoding="utf-8") as f:
+           f.write(repr(ndftext))
 
 def delete_files_not_needed(oldlist,new_list):
     lookup=  {
@@ -71,7 +90,7 @@ def classifier(pdftext):
        continue
      if row.get('sector'):
       if is_a_good_row(row,"sector"):
-        row=[{"company":row["text"].split("||")[0],"site":"tel","link":row['link'],"report-date":row['date'],"broker":row['broker']}]
+        row=[{"company":row["company"],"site":"tel","link":row['link'],"report-date":row['date'],"broker":row['broker']}]
         db.insert_into_sector(row)
         delete_list.append(i)
         continue
@@ -87,8 +106,12 @@ def classifier(pdftext):
    return complist,delete_list
 
 
-def main_func():
- pdftext=read_data(FILE_PATH)
+def main_func(readNeeded=True,data=None):
+ global pdftext
+ if readNeeded or not data:
+   pdftext=read_data(FILE_PATH)
+ else:
+   pdftext=data
  complist,dellist=classifier(pdftext)
  new_list=check_if_present(complist,"telgram")
  delete_files_not_needed(complist,new_list) 
@@ -115,13 +138,14 @@ def index():
 def save():
     # Retrieve lists of data from the form
     ids = request.form.getlist('id')
-    texts = request.form.getlist('text')
+ #   texts = request.form.getlist('text')
     brokers = request.form.getlist('broker')
     companies = request.form.getlist('company')
     dates = request.form.getlist('date')
     recommendations = request.form.getlist('recommendation')
     targets = request.form.getlist('target_price')
     links = request.form.getlist('link')
+    print(len(ids),len(brokers),len(companies))
     updated_data = []
     for i in range(len(ids)):
         current_id =ids[i]
@@ -129,7 +153,7 @@ def save():
         is_sector_checked = f"sector_{current_id}" in request.form
         entry = {
             "id": ids[i],
-            "text": texts[i],
+            #"text": pdftext[i]["text"],
             "broker": brokers[i],
             "company": companies[i],
             "date": dates[i],
@@ -147,8 +171,8 @@ def save():
         print("Successfully saved to /tmp/pdfanalysis", "success")
         save_data(updated_data)
     elif action == 'update_db':
-        save_data(updated_data)
-        main_func()
+        save_data(updated_data,False)
+        main_func(False,updated_data)
         print("Database updated successfully!", "info")
     return redirect(url_for('index'))
 
