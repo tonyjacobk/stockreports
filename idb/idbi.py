@@ -77,6 +77,8 @@ def get_reports(html, olddate):
                   rr=True
                 # Extract company name before ':' (if any)
                 company = text.split(":", 1)[0].strip()
+                company= re.sub(r'\([^)]*\)', '', company)
+                
 
                 href = link.get('href', '').strip()
 
