@@ -268,7 +268,8 @@ def generic_recommendation(text):
              return m2.group(key).upper()
  return None
 
-def get_target_and_recomm(url,count=500):
+def get_target_and_recomm(url,count=2000):
+
  print("Downloading from ...",url)
  try:
   download_file(url)
@@ -280,9 +281,9 @@ def get_target_and_recomm(url,count=500):
  target=generic_target_price(text)
  return recomm,target
 """
-
+download_file('https://keynotecapitals.com/wp-content/uploads/2026/05/Quarterly-Update-Report-Federal-Bank-Ltd-Q4FY26.pdf')
+text=return_text('tempfile',2000)
 recomm=generic_recommendation(text)
 target=generic_target_price(text)
 print(recomm, target) 
-
 """
