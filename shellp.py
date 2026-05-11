@@ -3,6 +3,7 @@ from shkhan import shkhan_main
 from hdfc import hdfc_main
 from vent import vent_main
 from dolat import dolat_main
+from keynote import keynote_main
 import logging
 import sys
 from stockutils import get_target_and_recomm,print_table,get_last_report_date,check_if_present,db,update_last_report_date,check_if_present_no_code
@@ -47,6 +48,8 @@ def get_reports(brk_list):
   shellp_main("vent",vent_main,True,"Ventura Securities","vent")
  if "dolat" in brk_list:
   shellp_main("dolat",dolat_main,True,"Dolat Securities","dolat")
+ if "keynote" in brk_list:
+      shellp_main("keynote",keynote_main,True,"Keynote Capital","keynote")
 if len(sys.argv) > 1:
     mylist=sys.argv[1:]
     print(mylist)

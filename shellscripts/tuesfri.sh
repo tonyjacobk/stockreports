@@ -1,2 +1,2 @@
 cd /home/ubuntu/stockreports
-/home/ubuntu/.venv/bin/python3 shellp.py  vent hdfc
+/home/ubuntu/.venv/bin/python3 shellp.py  vent hdfc keynote
