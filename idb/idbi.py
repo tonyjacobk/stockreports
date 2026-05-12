@@ -6,6 +6,7 @@ from stockutils import get_last_report_date,update_last_report_date
 from stockutils import db,print_table,add_codes_to_reports
 from stockutils import get_target_price_recomm_idbi
 import logging
+import re
 logger = logging.getLogger(__name__)
 
 
