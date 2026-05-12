@@ -1,5 +1,5 @@
 from datetime import date, timedelta,datetime
-from shkhan import shkhan_main 
+from bob import bob_main 
 from hdfc import hdfc_main
 from vent import vent_main
 from dolat import dolat_main
@@ -40,8 +40,8 @@ def shellp_main(brk_tag,main_func,rep_analysis_needed,brokerName,brokerCode):
 def get_reports(brk_list):
  initialize_logger()
  print(brk_list)
- if "shkhan" in brk_list:
-  shellp_main("shkhan",shkhan_main,True,"ShareKhan","shkhan")
+ if "bob" in brk_list:
+  shellp_main("bob",bob_main,True,"BOB Capital","bob")
  if "hdfc" in brk_list:
   shellp_main("hdfc",hdfc_main,True,"HDFC Sec","hdfc`")
  if "vent" in brk_list:
