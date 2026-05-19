@@ -117,7 +117,9 @@ def get_real_url(url):
   else:
     logger.error("Failed to get or parse the webpage. %s",url)
   if not nurl :
-    nurl=find_all_moneycontrol_image_hrefs(soup)[-1]
+    nurl_list=find_all_moneycontrol_image_hrefs(soup)
+    if len(nurl_list) >= 1:
+     nurl=nurl_list[-1]
   if not nurl:
      nurl=url
      logger.error("Mail Failed of extract PDF in MC %s",url)

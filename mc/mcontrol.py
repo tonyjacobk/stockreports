@@ -105,6 +105,7 @@ def scrape_a_table(elements,saved_time,pagecnt):
         last_update=published_time
     # Process each element
     for elem in elements:
+       
         # Find the first <p>
         pub_time=find_published_time(elem)
         if not pub_time:
@@ -170,7 +171,7 @@ def scrape_money_control(saved_time,pagecnt):
     # Find all elements with id starting with 'newslist-'
     elements = soup.find_all(id=re.compile("^newslist-"))
     results,end=scrape_a_table(elements,saved_time,pagecnt)
-    logger.info ("MC: After Scrapping  %s \n",json.dumps(results, indent=2))
+    logger.info ("MC: After Scrapping page %s  %s \n",pagecnt,json.dumps(results, indent=2))
     return results,end
  else:
     logger.error("Failed to fetch page. Status: %s", response.status_code)
@@ -203,3 +204,4 @@ def main_mc():
   db.insert_into_database(cdets,"mc")
  except Exception as e:
   logger.error(f"MC had issues {e}")
+  raise
