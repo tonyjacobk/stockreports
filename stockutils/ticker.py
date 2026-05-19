@@ -191,7 +191,7 @@ def remove_unwanted_keys(original_list):
 
 def preprocess_list(comp_list):
     for i in comp_list:
-        i["companyName"]=preprocess_text(i["companyName"])
+         i["companyName"]=preprocess_text(i["companyName"])
     return (comp_list)
 
 def initials_check(complist,text):
