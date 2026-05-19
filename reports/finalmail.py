@@ -1,9 +1,13 @@
 import smtplib
+import os
+from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.message import EmailMessage
 from create_logreport import get_report
 from errmail import create_error_report
+
+load_dotenv()
 def send_html_email(log_email, password, recipient_email, subject, html_content,server):
     # Create the MIME object
     msg = MIMEMultipart()
@@ -34,10 +38,8 @@ if __name__ == "__main__":
  #   smtp_server = "in-v3.mailjet.com"
     smtp_server = "smtp-relay.brevo.com"
     port =587
-#    log_email = "ab9fbf01d4626bcfeab77924c30bf4c6"
-#    password = "b864cbfdcb6b8e2c0c09a9f49f081078"  # 🔑 replace with your actual password
-    log_email='94f536001@smtp-brevo.com'
-    password= 'xsmtpsib-01c3af53e00db5a5561da0d1f4b12153cc526259e6f413f79cee778d7d6ca6f3-NIa4s7WLvUR9KH4Z'
+    log_email=os.getenv("log_email_brevo").strip()
+    password= os.getenv("password_brevo").strip()
     recipient_email = "tonyjacobk@gmail.com"
     sender_email="tonyjacob@hotmail.com"
     try:
