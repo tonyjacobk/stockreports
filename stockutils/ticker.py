@@ -143,6 +143,7 @@ def ask_for_help(text,best):
         print ("Confusion ",text ,best)
 
 def expand_short_forms(raw_name: str) -> str:
+    print(raw_name)
     replacements = {
         'corpn': 'Corporation',
         'ltd': 'Limited',
@@ -184,6 +185,7 @@ def remove_unwanted_keys(original_list):
  new_list = [
     {key: value for key, value in d.items() if key in {"symbol", "companyName","series"}}
     for d in original_list
+    if all(d.get(k) is not None for k in {"symbol", "companyName", "series"})
 ]
  return new_list
 
@@ -248,12 +250,16 @@ def new_search(text: str):
             return 0,val
        if ret==0:
            return 0,val
-       best=find_best_match(val)  
+       best=find_best_match(val) 
+       print("best len is",len(best))
+       print(best)
        if len(best) ==1:
            return 0,best
+       blen=len(best)-1
        for i in range (len(best)):
-           if best[i]['series']!="EQ":
-             best.pop(i)
+           print(best[blen-i],"Best[i]",i)
+           if best[blen-i]['series']!="EQ":
+             best.pop(blen-i)
        if len(best) ==1:
            return 0,best
        ask_for_help(text,best)
