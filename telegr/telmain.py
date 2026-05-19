@@ -36,7 +36,7 @@ DONT_CARE = [
     "adb ", "boj ", "banque ", "binance ", "stablecoin", "ddw", "global outlook",
     "oecd ", "imf ", "blockchain", "bridgewise", "socgen", "barclays", "zurich",
     "deutsche bank", "coinbase", "macro", "bcg ", "boe ", "boston", "wharton",
-    "payments infrastructure"
+    "payments infrastructure","channel check","isda","bank of england","gsx","bca","gs brian garrett"
 ]
 
 def classify_reports(s: str) -> str:
@@ -124,7 +124,6 @@ async def handle_single_message(message,tc):
       return tc
   except Exception as e:
        print(message)
-       raise
        return tc
 
 async def handle_single_company_broker_report(message,fname,u,reps,rep_date):
@@ -141,7 +140,7 @@ async def handle_single_company_broker_report(message,fname,u,reps,rep_date):
 
 async def tel_old_200():
     count=0
-    old_message=int(read_first_line('./cntrfiles/beatstreet.txt').strip())
+    old_message=int(read_first_line('./cntrfiles/ibeat.txt').strip())
     async for message in client.iter_messages(group_entity,min_id=old_message-200,reverse=True):
      count=count+1
      if message.id > old_message:
@@ -168,7 +167,8 @@ async def read_new_messages(fullread=True,mc=25):
          return
      total_count= await handle_single_message(message,total_count)
      lastid=message.id
-     
+     print("Last id is ", lastid)
+
 async def read_single_message(messid):
  message=await client.get_messages(group_entity, ids=messid)
  await handle_single_message(message,0)
@@ -184,22 +184,28 @@ async def read_file_load():
       await read_single_message(int(line.strip()))
 
 
-def beat_morning():
+def beat_morning(param,id=""):
  global fileNames,lastid,fromfile
  try:
   get_last_ndays_data(20)
   loop = asyncio.get_event_loop()
-  loop.run_until_complete(tel_old_200())
-  loop.run_until_complete(read_new_messages(True,100))
-#  loop.run_until_complete(read_new_messages(False,100))
-#  loop.run_until_complete(read_file_load())
-#  loop.run_until_complete(read_single_message(52352))
+  if param=="DOONE":
+    loop.run_until_complete(read_single_message(id))
+  if param=="FROMFILE":
+      loop.run_until_complete(read_file_load())
+  if param=="DOALL":
+      tel_old_200()
+      loop.run_until_complete(read_new_messages(True,100))
+  if param=="DOSOME":
+     tel_old_200()
+     loop.run_until_complete(read_new_messages(False,100))
+ except Exception as e:
+  print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
+  return
+ finally:
   if not lastid:
       logger.error("lastid missing")
   else:
     write_first_line('./cntrfiles/ibeat.txt',str(lastid))
   write_text_to_file(pdftext,"pdfanalysis")
- except Exception as e:
-  print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
-  return
-
+ 

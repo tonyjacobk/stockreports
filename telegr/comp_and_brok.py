@@ -105,6 +105,6 @@ def upload_sector_files(fname,broker,date):
 def create_analyze_data(date,ds,fname,messid,tp,recomm,text,pdftext) :
    link=upload_mega_file(fname)
    datestr=date.strftime("%Y-%m-%d")
-   append_text={"id":messid,"text":text,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
+   append_text={"id":str(messid),"text":text,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
    logger.info("Need further analysis %s :",append_text)
    pdftext.append(append_text) 

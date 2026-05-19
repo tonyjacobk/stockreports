@@ -113,6 +113,7 @@ def clean_result_update_file(inputfile,brk):
 
 def extract_broker_and_company_other(fname):
  print("in extractother")
+ fname=x = re.sub(r'\s+', ' ', fname.replace('-', ' ')).strip() ## _ and + are already removed , removing - also
  phrases = [
     "Research Report",
     "Initiating Coverage",

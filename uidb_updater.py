@@ -37,11 +37,9 @@ def save_data(pdftext,Sneeded=True):
         print("text lookup size",len(text_lookup.keys()))
         print("Size of PDftext",len(pdftext))
         skeys=text_lookup.keys()
-        rkeys=[str(x) for x in skeys]
-        print(rkeys)
         for item in pdftext:
              print("PDFtext id is ",item['id'])
-             if item['id'].strip() in rkeys:
+             if item['id'].strip() in skeys:
                  print ("Found")
                  item['text']=text_lookup[item['id']]
                  print ("Item is ",item)
