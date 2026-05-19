@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-report="/tmp/telg.log"
+report="/tmp/telgram.log"
 def generate_morning_log_report():
     log_path = report
     
@@ -25,7 +25,8 @@ def generate_morning_log_report():
         'strategy':0,
         'econ':0,
         'File too huge':0,
-        'othcomp':0
+        'othcomp':0,
+        'NI':0
     }
 
     if not os.path.exists(log_path):
@@ -60,6 +61,7 @@ def generate_morning_log_report():
     othcomp      = keyword_counts['othcomp']
     econ         = keyword_counts['econ']
     huge         = keyword_counts['File too huge']
+    ni           = keyword_counts['NI']
     useful       =thematic+others+compbrok+compres+onreport+sector+othcomp
     # Generate HTML Table
     html_table = f"""
@@ -84,6 +86,7 @@ def generate_morning_log_report():
         <tr><td style="padding: 8px;">Economy</td><td>{econ}</td></tr>
         <tr><td style="padding: 8px;">Company Results</td><td>{compres}</td></tr>
         <tr><td style="padding: 8px;">Huge</td><td>{huge}</td></tr>
+        <tr><td style="padding: 8px;">Not Important</td><td>{ni}</td></tr>
         <tr><td style="padding: 8px;">Useful Reports</td><td>{useful}</td></tr>
     </table>
     """
@@ -108,6 +111,7 @@ def get_analysis_report(log_file="/tmp/telg.log"):
     toohuge = 0
     duplicate=0
     comprep=0
+    dupsec=0
     huge_lines = []
    
     with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -117,17 +121,18 @@ def get_analysis_report(log_file="/tmp/telg.log"):
 
             if "Mail Adding to sector reports" in line:
                 sector += 1
-
             if "Need further analysis" in line:
                 analysis += 1
             if "present in DB with URL" in line:
                 duplicate += 1
             if " Data to be inserted into DB" in line:
                 comprep += 1
+            if "Mail Sector file" in line:
+                dupsec +=1
             if "File too huge .." in line:
                 toohuge += 1
                 huge_lines.append(line.strip())
-    accounted=comprep+duplicate+analysis+sector
+    accounted=comprep+duplicate+analysis+sector+dupsec
     # -------- Table 1: Huge lines --------
     huge_table = """
     <table border="1" cellpadding="5" cellspacing="0">
@@ -171,6 +176,11 @@ def get_analysis_report(log_file="/tmp/telg.log"):
             <td>New Company Report</td>
             <td>{comprep}</td>
         </tr>
+         <tr>
+            <td> Duplicate Sector Report</td>
+            <td>{dupsec}</td>
+        </tr>
+
         <tr>
             <td>Reports Accounted </td>
             <td>{accounted}</td>
