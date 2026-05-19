@@ -18,7 +18,6 @@ grep "$today_date" "$file_name" |grep "Mail" > /tmp/maillog
 python3 finalmail.py
 cp /tmp/myapp.log /tmp/myapp.bak
 cp /tmp/telgram.log /tmp/telgram.bak
-cp /tmp/morntele.log /tmp/morntele.bak
 
 python3 myftp.py
   
@@ -26,7 +25,6 @@ if [ $? -eq 0 ]; then
   echo "FTP done"
   rm /tmp/myapp.log
   rm /tmp/telgram.log
-  rm /tmp/morntele.log
 else
   echo "FTP failed"
 fi

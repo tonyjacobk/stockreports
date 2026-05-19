@@ -7,7 +7,7 @@ def upload_file(src,dest):
  try:
     ftp = ftplib.FTP('ftpupload.net')
     ftp.login('if0_39747564', 'Simansy2022')
-    ftp.cwd('/') # Change to the directory containing the file
+    ftp.cwd('/htdocs') # Change to the directory containing the file
     ftp.encoding = "utf-8" # Optional: force UTF-8 encoding
 
     with open(src, 'rb') as file:
@@ -29,11 +29,9 @@ def upload_log():
  dat=datetime.datetime.now().date()
  fname="log"+str(dat)
  c=upload_file('/tmp/myapp.log',fname)
- mname="morning"+str(dat)
- c1=upload_file('/tmp/morntele.log',mname)
- aname="analysis"+str(dat)
+ aname="telegram"+str(dat)
  c2=upload_file('/tmp/telgram.log',aname)
- if c and c1 and c2:
+ if c  and c2:
      sys.exit(0)
  else:
      sys.exit(1)

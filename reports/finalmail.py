@@ -31,14 +31,20 @@ def send_text_email(smtp_server, port, sender_email,password , recipient_email, 
 
 if __name__ == "__main__":
     # Example usage
-    smtp_server = "in-v3.mailjet.com"
+ #   smtp_server = "in-v3.mailjet.com"
+    smtp_server = "smtp-relay.brevo.com"
     port =587
-    log_email = "ab9fbf01d4626bcfeab77924c30bf4c6"
-    password = "b864cbfdcb6b8e2c0c09a9f49f081078"  # 🔑 replace with your actual password
+#    log_email = "ab9fbf01d4626bcfeab77924c30bf4c6"
+#    password = "b864cbfdcb6b8e2c0c09a9f49f081078"  # 🔑 replace with your actual password
+    log_email='94f536001@smtp-brevo.com'
+    password= 'xsmtpsib-01c3af53e00db5a5561da0d1f4b12153cc526259e6f413f79cee778d7d6ca6f3-NIa4s7WLvUR9KH4Z'
     recipient_email = "tonyjacobk@gmail.com"
     sender_email="tonyjacob@hotmail.com"
     try:
+        print("Here")
         server = smtplib.SMTP(smtp_server,port)  
+        server.set_debuglevel(1)
+        print("server initialized")
         server.starttls()  # Secure the connection
         print ("ttls")
         server.login(log_email, password)
