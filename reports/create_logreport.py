@@ -71,7 +71,7 @@ def parse_log_file(log_file):
                     smifs_data['Results'] = int(match.group(1))
         
         # Source data parsing (MC, BS, etc.)
-        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct|Dolat|Ventura Securities|HDFC Sec)', line):
+        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct|Dolat|Ventura Securities|HDFC Sec|Mangal Keshav|BOB Capital)', line):
             source_match = re.search(r'Mail: (\w+)', line)
             date_match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
             found_match = re.search(r'Found (\d+) new reports', line)
