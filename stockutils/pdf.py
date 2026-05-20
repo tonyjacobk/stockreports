@@ -281,8 +281,12 @@ def get_target_and_recomm(url,count=2000):
  target=generic_target_price(text)
  return recomm,target
 """
-download_file('https://keynotecapitals.com/wp-content/uploads/2026/05/Quarterly-Update-Report-Federal-Bank-Ltd-Q4FY26.pdf')
+g,b=get_target_and_recomm('https://www.mangalkeshav.com/research-reports/wp-content/uploads/2026/04/Inox-India-limited-fundamental-analysis-stock-report.pdf')
+print(g,b)
+
+download_file('https://www.mangalkeshav.com/research-reports/wp-content/uploads/2026/04/Inox-India-limited-fundamental-analysis-stock-report.pdf')
 text=return_text('tempfile',2000)
+print(text)
 recomm=generic_recommendation(text)
 target=generic_target_price(text)
 print(recomm, target) 
