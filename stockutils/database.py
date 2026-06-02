@@ -56,7 +56,7 @@ def normalize_broker_name(brkr_name: str) -> str:
 def valid_broker(brk,brk_check=True):
     if not brk_check:
       return True
-    brk_list=["Geojit","HDFC","Axis","SMIFS"]
+    brk_list=["Geojit","HDFC","Axis"]
     for word in brk_list:
         if word in brk:
             return False
