@@ -75,7 +75,7 @@ def check_if_present_no_code(table):
    except ValueError as e:
      logger.error ("Error with datetime conversion {e} ")
      continue
-   logger.info("Trying to add %s %s %s ",i["broker"],i["recommendation"],i["target"])
+   logger.info("Trying to add %s %s %s %s ",i['Company'],i["broker"],i["recommendation"],i["target"])
    c= aiven.db.row_exists_no_comp(i["broker"],i["recommendation"],i["target"])
    logger.info("Found %s entries",len(c))
    if not c:
@@ -101,7 +101,19 @@ def check_if_present_no_code(table):
       logger.error("check if present :Error with ",str(e))
  return(tobeadded) 
 
-
+def check_if_name_present(table,src,brk_check=True):
+  new_table=[]
+  for data in table:
+   if not valid_broker(data['broker'],brk_check):
+       logger.info("Mail:Not adding  .Dropping as broker known %s, new Source: %s",data['broker'],src)
+       continue
+   if data['code']=='' or not data['code']:
+    val,url=check_for_name_in_dbcache(data['broker'],data['Company'])
+    if not val :
+     new_table.append(data)
+    else:
+        logger.info("Mail:Not adding . %s %s %s present,new Source :%s",data['broker'],data['Company'],url,src)
+  return new_table
 def check_if_present(table,src,brk_check=True):
   new_table=[]
   add_codes_to_reports(table)
@@ -150,6 +162,7 @@ def get_last_ndays_sector_date():
 
 
 def check_in_dbcache(broker,nsekey):
+    print("broker ",broker,"  NSE key ",nsekey)
     # Check if NSEKEY exists in the dictionary
     if nsekey in db_cache:
         # Check if any entry in the list has the matching broker
@@ -157,6 +170,11 @@ def check_in_dbcache(broker,nsekey):
             if entry['broker'].strip() == broker.strip():
                 logger.info("Mail broker %s  and NSEKEY %s present in DB with URL %s",broker,nsekey,entry['URL'])
                 return True,entry['URL']
+    return False,""
+def check_for_name_in_dbcache(broker,company):
+    for i in db_cache['']:
+        if i['broker'].strip()==broker and i['company'].strip()==company:
+          return True,i['URL']
     return False,""
 def check_in_sector_cache(repName):
     if repName in sector_cache:
