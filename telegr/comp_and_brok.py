@@ -57,7 +57,7 @@ def do_second_round_for_Others(text,tp,recomm,ds):
       ds['company']=comp
       needCheck=True
  if ds["cf"] and ds["bf"] and needCheck:
-    print("Checking duplicates")
+    print("Checking duplicates after analysis of reports")
     pr,url=check_in_dbcache(ds["broker"],ds["code"])
     if pr:
         return -1,ds # Already present 
