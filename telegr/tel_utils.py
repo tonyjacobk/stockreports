@@ -273,5 +273,8 @@ def upload_mega_file(fname):
        pass
    else:
        link=MegaMan.upload_file(fname)
+       if not link:
+           logger.error("Could not upload file %s",fname)
+           link="http://mydummyfile.com"
    return link
 
