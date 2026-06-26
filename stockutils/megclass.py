@@ -113,5 +113,13 @@ class MegaManager:
       print("Could not find file from this URL %s",URL)
       return None
 
-
+    def empty_trash(self):
+     try:
+       print("Emptying trash...")
+       self.mega.empty_trash()
+       print("Trash emptied successfully!")
+       return 1
+     except Exception as e:
+       print(f"An error occurred: {e}")
+       return -1
 MegaMan=MegaManager("tonyjacobk@gmail.com","Seemu@2002")
