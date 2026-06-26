@@ -57,10 +57,13 @@ def fetch_smifs_reports(
                 "Company": report.get("Title").split('-')[0].strip(),
                 "report-date": published_dt,
                 "broker":"SMIFS",
-                "link":"https://smifs.com"+report.get("upload_file").get("url")
+                "link":"https://smifs.com"+report.get("upload_file").get("url"),
+                "site":"smifs"
               }
             if key=="icrs":
                 tres["recommendation"]="initiating"
+            if key=="sector-reports":
+                tres['company']=tres['Company'] #sector key is company 
             results.append(tres)
 
         if stop_fetching:
