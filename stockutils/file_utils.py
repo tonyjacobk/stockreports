@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-brk_dict={"IDBI":"./cntrfiles/idbi.txt","Axis":"./cntrfiles/axis.txt","geojit":"./cntrfiles/geojit.txt","vent":'./cntrfiles/ventura.txt',"bob":'./cntrfiles/bob.txt',"hdfc":'./cntrfiles/hdfc.txt',"dolat":"./cntrfiles/dolat.txt","keynote":"./cntrfiles/keynote.txt","smifs":"./cntrfiles/smifs.txt"}
+brk_dict={"IDBI":"./cntrfiles/idbi.txt","Axis":"./cntrfiles/axis.txt","geojit":"./cntrfiles/geojit.txt","vent":'./cntrfiles/ventura.txt',"bob":'./cntrfiles/bob.txt',"hdfc":'./cntrfiles/hdfc.txt',"dolat":"./cntrfiles/dolat.txt","keynote":"./cntrfiles/keynote.txt","smifs":"./cntrfiles/smifs.txt","mncl":"./cntrfiles/mncl.txt"}
 
 def read_first_line(filename):
     try:
