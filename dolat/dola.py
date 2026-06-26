@@ -43,11 +43,11 @@ def extract_new_reports(soup: BeautifulSoup, lastdate: datetime) -> list[dict]:
                 
                 if not link:
                     continue
-                
                 # Make absolute if relative
                 if not link.startswith("http"):
                     link = "https://www.dolatresearch.com/" + link.lstrip("/")
                 # Parse date (adjust format if needed)
+
                 try:
                     # Common Indian format: DD/MM/YYYY or DD/MM/YY or with time
                     idate2 = datetime.strptime(date_str.split()[0], "%d/%m/%Y").date()
