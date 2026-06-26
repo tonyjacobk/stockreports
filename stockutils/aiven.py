@@ -53,7 +53,7 @@ class DBClient:
   start_date = date1 -timedelta(days=days)
   end_date = date1 + timedelta(days=days)
   query="""
-        SELECT NSEKEY, broker, URL 
+        SELECT NSEKEY, broker, URL,company
         FROM reports
         wHERE report_date BETWEEN %s AND %s
     """
