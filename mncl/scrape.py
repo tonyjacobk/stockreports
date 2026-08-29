@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
-
+from .months import get_date_object
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_companies(url):
@@ -66,19 +66,16 @@ def get_second_page(url, dat):
         
         report_list = soup.find(class_='report-list')
         if not report_list:
-            print("Warning: 'report-list' class not found.")
+            print("Warning: 'report-list' class not found.",url)
             report_list= soup.find(class_='blog-dtxt')
             if not report_list:
              logger.error("Warning Could not find blog-dtxt and report-class %s",url)
              return None
         
-        # Parse target date for comparison (Month Year format)
-        try:
-            target_date = datetime.strptime(dat, "%B %Y").date()
-        except ValueError:
-            print(f"Error: Target date '{dat}' should be in format like 'May 2026'")
+        target_date=get_date_object(dat)
+        if not target_date:
             return None
-        
+
         # Go through each <li> one by one
         for li in report_list.find_all('li'):
             # Get the link
@@ -93,17 +90,22 @@ def get_second_page(url, dat):
                 continue
                 
             # Parse report date
+            """
             try:
                 report_date = datetime.strptime(rep_date_text, "%B %Y").date()
             except ValueError:
                 logger.error("Check date %s",url)
                 continue  # Skip if format doesn't match
-            
-            # Exact match → return the link
-            if rep_date_text == dat:
+            # Exact match → return the link . Remove spaces , ignore case then check 
+            if rep_date_text.replace(" ","").casefold() == dat.replace(" ","").casefold():
                 return furl
-            
-            # Report is older than target → stop and return None
+            """
+            report_date=get_date_object(rep_date_text)
+            if not report_date:
+                continue
+            if report_date ==  target_date:
+                return furl
+              # Report is older than target → stop and return None
             if report_date < target_date:
                 return None
                 
@@ -115,7 +117,7 @@ def get_second_page(url, dat):
         print(f"Error fetching URL: {e}")
     except Exception as e:
         logger.error("Error parsing URL %s",url)
-        print(f"Error parsing page: {e}")
+        print(f"Error parsing Second page: {e}")
     
     return None
 def get_date(soup):
@@ -158,20 +160,22 @@ def get_url(soup):
     else:
         print("Warning: No <a> tag with href found inside the <p>.")
         return None
-def last_page(url):
+def last_page(purl):
     try:
         # Fetch the page
-        response = requests.get(url, timeout=10,verify=False)
+        response = requests.get(purl, timeout=10,verify=False)
         response.raise_for_status()
 
         # Parse HTML
         soup = BeautifulSoup(response.text, 'html.parser')
         url=get_url(soup)
+        if not url:
+            print ("Could not find ",purl)
         rep_date=get_date(soup)
         # Find the table
         table = soup.find('table', class_='dcf-table')
         if not table:
-            print("Warning: Table with class 'dcf-table' not found.")
+            print("Warning: Table with class 'dcf-table' not found for URL- ",url) 
             logger.error("Table not available in page %s",url)
             return None, None,None,None
 
@@ -210,22 +214,26 @@ def last_page(url):
     return None, None,None,None
 
 
-# Example usage:
-# if
 
-def parse_mncl_main(url,month):
- comps=get_companies(url)
+def parse_mncl_main(murl,month):
+ comps=get_companies(murl)
  for comp in comps:
+  comp['recommendation']=comp['target']=comp['link']=None
+  comp['broker']='MNCL'
+  comp['report-date']=datetime.now().strftime("%d %b %Y")
   furl=get_second_page(comp['page2-link'],month)
+  if not furl:
+      url=comp['page2-link']
+      continue
   comp['furl']=furl
   rateing,target,url,repdate=last_page(furl)
+  print("From parse_mncl_main",url)
   if not url :
-      continue
+       url=furl
   comp['recommendation']=rateing
   comp['target']=target
   comp['report-date']=repdate
   comp['link']=url
-  comp['broker']='MNCL'
  return comps
 
 
