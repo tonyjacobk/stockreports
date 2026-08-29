@@ -12,7 +12,52 @@ import logging
 logger = logging.getLogger(__name__)
 last_update=""
 
-# Function to parse the title
+from datetime import datetime
+
+def standardize_date(date_str: str) -> str:
+    """
+    Convert dates like "Jun 01, 2026", "June 1 2026", etc.
+    to format: '%B %d, %Y' (e.g., "June 01, 2026")
+    """
+    # Clean the string
+    date_str = date_str.strip().strip('.')
+    
+    # Try multiple possible formats
+    formats = [
+        "%b %d, %Y",   # Jun 01, 2026
+        "%b %d %Y",    # Jun 01 2026
+        "%B %d, %Y",   # June 01, 2026
+        "%B %d %Y",    # June 01 2026
+        "%b %d,%Y",    # Jun 01,2026 (no space after comma)
+        "%B %d,%Y",    # June 01,2026
+    ]
+    
+    for fmt in formats:
+        try:
+            dt = datetime.strptime(date_str, fmt)
+            return dt.strftime("%B %d, %Y")
+        except ValueError:
+            continue
+    
+    # Fallback: Try with day without leading zero (e.g., "Jun 1, 2026")
+    # Replace common variations
+    cleaned = date_str.replace(',', ' ').strip()
+    parts = cleaned.split()
+    
+    if len(parts) == 3:
+        month, day, year = parts
+        # Try parsing with flexible day
+        for fmt in ["%b %d %Y", "%B %d %Y"]:
+            try:
+                dt = datetime.strptime(f"{month} {day} {year}", fmt)
+                return dt.strftime("%B %d, %Y")
+            except ValueError:
+                continue
+    
+    logger.error("Issue with date %s, using today's date",date_str)
+    return datetime.now().strftime("%B %d, %Y")  
+
+
 def parse_recommendation2(title):
     try:
         parts=title.split(';')
@@ -121,6 +166,7 @@ def scrape_a_table(elements,saved_time,pagecnt):
             match = re.search(r"research report dated\s*(.+)", text, re.IGNORECASE)
             if match:
                 rep_date = match.group(1).strip()
+                rep_date=standardize_date(rep_date)
         else:
             logger.error("p tag not found %s",elem)
             continue
@@ -204,4 +250,3 @@ def main_mc():
   db.insert_into_database(cdets,"mc")
  except Exception as e:
   logger.error(f"MC had issues {e}")
-  raise
