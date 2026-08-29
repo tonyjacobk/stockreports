@@ -1,16 +1,20 @@
 import requests
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
-
+from .smifsbot import get_reports
+import logging
+logger = logging.getLogger(__name__)
+from stockutils import print_table
+fetchfile=True
 def fetch_smifs_reports(
     lastdate: datetime,
     key: str
 ) -> Tuple[List[Dict[str, str]], Optional[datetime]]:
-
+    global fetchfile
     base_url = (
         "https://smifs.com/api/{key}"
         "?pagination%5Bpage%5D={page}"
-        "&pagination%5BpageSize%5D=6"
+        "&pagination%5BpageSize%5D=30"
         "&sort=publish_date%3Adesc&populate=*"
     )
     print("With key",key)
@@ -20,20 +24,15 @@ def fetch_smifs_reports(
 
     while True:
         url = base_url.format(key=key, page=page)
-
-        response = requests.get(url, timeout=20)
-        response.raise_for_status()
-
-        data = response.json()
-
-        reports = data.get("data", [])
+        print("From fetch_smifs_reports",url)
+        reports = get_reports(url,fetchfile)
         if not reports:
             break
         # Save publishedAt of very first row only
         if first_published_at is None:
             first_row = reports[0]
             first_pub = first_row.get("publishedAt")
-
+            logger.info("Lastest report in this page %s",first_pub)
             if first_pub:
                 first_published_at = datetime.fromisoformat(
                     first_pub.replace("Z", "+00:00")
@@ -79,7 +78,7 @@ def fetch_smifs_reports(
 
             if last_dt <= lastdate:
                 break
-
+        print(results)
         page += 1
 
     return results, first_published_at
@@ -106,7 +105,8 @@ def fetch_multiple_smifs_reports(
         except Exception:
             reports = []
             first_published_at = None
-
+        logger.info("New set of reports for key %s",key)
+        print_table(reports,logger)
         all_results.extend(reports)
 
         if first_published_at is None:
@@ -124,9 +124,10 @@ def fetch_multiple_smifs_reports(
 
 def smifs_main(lastdate):
  keys=['result-updates','icrs']
- print("In smifs_main")
+# keys=['result-updates']
  reports,ldate=fetch_multiple_smifs_reports(lastdate,keys)
  sector,lsdate=fetch_multiple_smifs_reports(lastdate,['sector-reports'])
+ print(sector)
  print(ldate,lsdate)
  if ldate < lsdate:
      ldate=lsdate
