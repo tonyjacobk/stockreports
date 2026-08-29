@@ -68,12 +68,28 @@
             <div class="field"><label>Date</label><input type="date" name="date" value="{{ entry.date or '' }}" size="10"></div>
             <div class="field"><label>Recommendation</label><input type="text" name="recommendation" value="{{ entry.recommendation or '' }}"></div>
             <div class="field"><label>Target</label><input type="text" name="target_price" value="{{ entry.target_price or '' }}" size="8"></div>
-            <div class="field"><label>Link</label><input type="url" name="link" value="{{ entry.link or '' }}"></div>
+	     <div class="field"><label>Link</label><input type="text" name="URL" value="{{ entry.link or '' }}" size="20"></div>
+                    {# Build the custom link #}
+                    {% set original_link = entry.link or '' %}
+                    {% set custom_link = 'https://stocks-xi-one.vercel.app/show/' %}
+
+                    {# If link contains 'https://mega.co.nz/#!', replace it #}
+                    {% if 'https://mega.co.nz/#!' in original_link %}
+                        {% set display_link = original_link.replace('https://mega.co.nz/#!', custom_link) %}
+                    {% else %}
+                        {% set display_link = original_link %}
+                    {% endif %}
+        <div class="field"><label>Icon</label>
+         <a href="{{ display_link }}" target="_blank">
+          <img src="{{ url_for('static', filename='icon.png') }}" alt="URL Icon" width="20">
+                    </a>
         </div>
+
         <div class="field">
             <label>Text (160 Chars)</label>
             <textarea  class="analysis-text" rows="4" cols="200" readonly>{{ entry.text }}</textarea>
         </div>
+    </div>	
     </div>
     {% endfor %}
 </form>
