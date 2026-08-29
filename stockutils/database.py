@@ -45,6 +45,7 @@ def compare_strings(str1, str2):
 # Example usage
 
 def normalize_broker_name(brkr_name: str) -> str:
+
  for key, value in controls.brokers.items():
         if key.lower() in brkr_name.lower():
             return value
@@ -56,13 +57,15 @@ def normalize_broker_name(brkr_name: str) -> str:
 def valid_broker(brk,brk_check=True):
     if not brk_check:
       return True
-    brk_list=["Geojit","HDFC","Axis"]
+    brk_list=["Axis"]
     for word in brk_list:
         if word in brk:
             return False
     return True 
 
 def check_if_present_no_code(table):
+ print("From check_if_present_no_code")
+ print(table)
  tobeadded=[]
  for i in table: ## list of new entries
   if i['code']:
@@ -107,6 +110,9 @@ def check_if_name_present(table,src,brk_check=True):
    if not valid_broker(data['broker'],brk_check):
        logger.info("Mail:Not adding  .Dropping as broker known %s, new Source: %s",data['broker'],src)
        continue
+   if data['code']:
+        new_table.append(data)
+        continue
    if data['code']=='' or not data['code']:
     val,url=check_for_name_in_dbcache(data['broker'],data['Company'])
     if not val :
@@ -118,10 +124,11 @@ def check_if_present(table,src,brk_check=True):
   new_table=[]
   add_codes_to_reports(table)
   for row in table:
+   print(row)
    brk=normalize_broker_name(row['broker'])
    row['broker']=brk
   for data in table:
-   print(data)
+   print(data,"Data")
    if not valid_broker(data['broker'],brk_check):
        logger.info("Mail:Not adding  .Dropping as broker known %s, new Source: %s",data['broker'],src)
        continue

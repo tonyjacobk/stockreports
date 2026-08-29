@@ -195,6 +195,20 @@ def get_data_and_recomm_icicid(url):
   print("Could not get from :",url)
   print(str(e))
 
+def get_title_from_meta(fileName):
+  try:
+    reader = PdfReader(fileName)
+    meta = reader.metadata
+    title=meta['\Title']
+    if title:
+      return title
+    return None
+  except Exception as e:
+      logger.error("Error with meta data for file %s : %s",fileName,str(e)) 
+      return None
+
+
+
 def generic_target_price(text):
  pattern = re.compile(
     r"""(?ix)
@@ -287,7 +301,9 @@ print(g,b)
 download_file('https://www.mangalkeshav.com/research-reports/wp-content/uploads/2026/04/Inox-India-limited-fundamental-analysis-stock-report.pdf')
 text=return_text('tempfile',2000)
 print(text)
-recomm=generic_recommendation(text)
+text="PT of Rs. 70"
+
+#recomm=generic_recommendation(text)
 target=generic_target_price(text)
-print(recomm, target) 
+print( target) 
 """
