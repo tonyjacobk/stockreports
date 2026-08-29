@@ -53,25 +53,9 @@ def parse_log_file(log_file):
             if match:
                 shareindia_data['Special Reports'] = int(match.group(1))
         
-        # SMIFS parsing
-        elif 'SMIFS Found' in line:
-            if 'Initiating Coverage' in line:
-                match = re.search(r'Found (\d+) new reports', line)
-                if match:
-                    smifs_data['Initiating Coverage'] = int(match.group(1))
-            
-            elif 'Pick of Month' in line:
-                match = re.search(r'Found (\d+) new reports', line)
-                if match:
-                    smifs_data['Pick of Month'] = int(match.group(1))
-            
-            elif 'Results' in line:
-                match = re.search(r'Found (\d+) new reports', line)
-                if match:
-                    smifs_data['Results'] = int(match.group(1))
         
         # Source data parsing (MC, BS, etc.)
-        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct|Dolat|Ventura Securities|HDFC Sec|Mangal Keshav|BOB Capital)', line):
+        elif re.match(r'.*Mail: (MC|BS|Axis|geojit|IDBI|ICICI Direct|Dolat|Ventura Securities|HDFC Sec|Mangal Keshav|BOB Capital|SMIFS|Keynote)', line):
             source_match = re.search(r'Mail: (\w+)', line)
             date_match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
             found_match = re.search(r'Found (\d+) new reports', line)
@@ -209,25 +193,6 @@ def generate_html_tables(shareindia_data, smifs_data, source_data, code_db_added
         </tr>
 """
 
-    html += """
-    </table>
-
-    <h2>SMIFS Reports</h2>
-    <table>
-        <tr>
-            <th>Report Type</th>
-            <th>Number of Reports</th>
-        </tr>
-"""
-
-    # Add SMIFS table rows
-    for report_type, count in smifs_data.items():
-        html += f"""
-        <tr>
-            <td>{report_type}</td>
-            <td>{count}</td>
-        </tr>
-"""
 
     html += """
     </table>

@@ -105,13 +105,13 @@ def get_analysis_report(log_file="/tmp/telg.log"):
     """
 
     today = date.today().strftime("%Y-%m-%d")
-
     sector = 0
     analysis = 0
     toohuge = 0
     duplicate=0
+    dup_sec=0
+    dup_analyze=0
     comprep=0
-    dupsec=0
     huge_lines = []
    
     with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -121,18 +121,21 @@ def get_analysis_report(log_file="/tmp/telg.log"):
 
             if "Mail Adding to sector reports" in line:
                 sector += 1
+
             if "Need further analysis" in line:
                 analysis += 1
             if "present in DB with URL" in line:
                 duplicate += 1
             if " Data to be inserted into DB" in line:
                 comprep += 1
-            if "Mail Sector file" in line:
-                dupsec +=1
+            if "Sector file  already present" in line:
+                dup_sec += 1
+            if "already present in Analyze records with id" in line:
+                dup_analyze += 1
             if "File too huge .." in line:
                 toohuge += 1
                 huge_lines.append(line.strip())
-    accounted=comprep+duplicate+analysis+sector+dupsec
+    accounted=comprep+duplicate+analysis+sector+dup_sec+dup_analyze
     # -------- Table 1: Huge lines --------
     huge_table = """
     <table border="1" cellpadding="5" cellspacing="0">
@@ -172,15 +175,19 @@ def get_analysis_report(log_file="/tmp/telg.log"):
             <td>Duplicate Company Report</td>
             <td>{duplicate}</td>
         </tr>
+         <tr>
+            <td>Duplicate Sector Report</td>
+            <td>{dup_sec}</td>
+        </tr>
+         <tr>
+            <td>Duplicate Analysis Report</td>
+            <td>{dup_analyze}</td>
+        </tr>
+
         <tr>
             <td>New Company Report</td>
             <td>{comprep}</td>
         </tr>
-         <tr>
-            <td> Duplicate Sector Report</td>
-            <td>{dupsec}</td>
-        </tr>
-
         <tr>
             <td>Reports Accounted </td>
             <td>{accounted}</td>
