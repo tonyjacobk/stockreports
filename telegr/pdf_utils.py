@@ -30,7 +30,13 @@ def extract_text_from_pdf(file_path, num_words=2000):
   except Exception as e:
         return f"An error occurred: {e}"
 
-
+def extract_meta_data(file_path):
+  try:
+   reader = PdfReader(file_path)
+   meta = reader.metadata
+   return meta
+  except exception as e:
+   return None
 
 
 

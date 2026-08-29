@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 from .broker_comp_finder import get_broker_and_company
 from stockutils import check_in_dbcache,db,MegaMan,check_in_sector_cache
 from .broker_specific import get_company_from_reports
-from .tel_utils import extract_target_price_and_recomm,find_broker_from_fileName,upload_mega_file,add_to_db,find_broker_from_text
+from .tel_utils import extract_target_price_and_recomm,find_broker_from_fileName,upload_mega_file,add_to_db,find_broker_from_text,analyze_recs
 from .pdf_utils import extract_text_from_pdf
 
 def is_report_present(fileName,mtype):
@@ -21,7 +21,9 @@ def is_report_present(fileName,mtype):
  return 1,comp_ds
 
 def do_second_round_analysis(ds,u,fname,rep_date,reps,pdftext,messid):
+ print("In second round analysis")
  text=extract_text_from_pdf('/tmp/comp.pdf',2000)
+ print("Text extracted %s",text)
  tp,recomm=extract_target_price_and_recomm(text) 
  print("Target price , Recomm from do_second_round_analysis",tp,recomm)
  if u=="Others":
@@ -36,6 +38,8 @@ def do_second_round_analysis(ds,u,fname,rep_date,reps,pdftext,messid):
        row={"Company":ds["company"],"broker":ds["broker"],"recommendation":recomm,"target":tp,"report-date":rep_date,"code":ds['code']} 
        upload_company_report_and_update_db(row,fname,reps)
      case 2:
+         if ds["company"]:
+             fname=ds["company"]
          process_sector_file(fname,ds["broker"],rep_date)
      case 3:
            create_analyze_data(rep_date,ds,fname,messid,tp,recomm,text,pdftext)
@@ -51,6 +55,9 @@ def do_second_round_for_Others(text,tp,recomm,ds):
          needCheck=True
  if not ds['cf'] and ds['bf'] :
   comp,code=get_company_from_reports(ds['broker'],text)
+  if code=="sector":
+      ds["company"]=comp
+      return 2,ds
   if code:
       ds['cf']=True
       ds['code']=code
@@ -77,7 +84,7 @@ def classify_reports(ds,tp,recomm):
 
 def process_sector_file(fname,brk,date):
    if check_in_sector_cache(fname):
-       logger.info("Mail Sector file %s already present",fname)
+       logger.info("Mail Sector file  already present %s",fname)
        return
    if not brk:
        brk=find_broker_from_fileName(fname)
@@ -103,8 +110,17 @@ def upload_sector_files(fname,broker,date):
     add_to_db("sect",row)
 
 def create_analyze_data(date,ds,fname,messid,tp,recomm,text,pdftext) :
+   global filelist
+   ret,val= analyze_recs.is_present_in_analyze_text(text[:1000])
+   if ret :
+     logger.info("Mail Record %s already present in Analyze records with id %s",messid,val)
+     logger.info(text[:500])
+     return 
    link=upload_mega_file(fname)
    datestr=date.strftime("%Y-%m-%d")
    append_text={"id":str(messid),"text":text,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
    logger.info("Need further analysis %s :",append_text)
-   pdftext.append(append_text) 
+   try:
+    analyze_recs.add_to_analyze_list(append_text)
+   except Exception as e:
+       print(str(e))

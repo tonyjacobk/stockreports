@@ -7,7 +7,7 @@ from .comp_and_brok import is_report_present,do_second_round_analysis,process_se
 import logging
 from datetime import date, timedelta,datetime
 logger = logging.getLogger(__name__)
-from .tel_utils import is_direct_broker,preprocessName, write_text_to_file
+from .tel_utils import is_direct_broker,preprocessName, write_text_to_file,analyze_recs
 from stockutils import read_first_line,write_first_line,get_last_ndays_data
 api_id = '17206937'
 api_hash = 'ab2de3d291b1f6317bb422cd23bf1712'
@@ -31,12 +31,12 @@ DAILY_KEYWORDS = (
 )
 
 DONT_CARE = [
-    "cryptoasset", "vontobel", "mckinsey", "standard chartered", "tiger research",
+    "crypto", "vontobel", "mckinsey", "standard chartered", "tiger research",
     "dbs bank", "kotak neo", "investment outlook", "banca", "amundi", "allianz",
     "adb ", "boj ", "banque ", "binance ", "stablecoin", "ddw", "global outlook",
     "oecd ", "imf ", "blockchain", "bridgewise", "socgen", "barclays", "zurich",
     "deutsche bank", "coinbase", "macro", "bcg ", "boe ", "boston", "wharton",
-    "payments infrastructure","channel check","isda","bank of england","gsx","bca","gs brian garrett"
+    "payments infrastructure","channel check","isda","bank of england","gsx","bca","gs brian garrett","ajzal","bis","hedge fund","black rock","ifc","mufg","merics","wisdom tree","wisdomtree","newyork life","new york life","blackrock","capco","bundesbank","harvard"
 ]
 
 def classify_reports(s: str) -> str:
@@ -96,7 +96,7 @@ def classify_reports(s: str) -> str:
 async def handle_single_message(message,tc):
   global reps
   global fileNames
-  print("In handle single nessage")
+  print("In handle single nessage %s",message.id)
   try:
       if message.media:
        if isinstance(message.media, MessageMediaDocument):
@@ -106,9 +106,10 @@ async def handle_single_message(message,tc):
          if fname in fileNames:
           logger.info("Report date %s Messageid %s: %s already present ", message.date.date(),message.id,fname1)
           return tc
+         fileNames.add(fname)        
          filesize=message.file.size
          if filesize >  7 * 1024 * 1024:
-           logger.info ("File too huge .. not processing %s",fname1)
+           logger.info ("File too huge .. not processing  %s %s",fname,message.id1)
            return tc 
          tc =tc+1
          u=classify_reports(fname)
@@ -173,6 +174,21 @@ async def read_single_message(messid):
  message=await client.get_messages(group_entity, ids=messid)
  await handle_single_message(message,0)
 
+async def handle_direct_upload(messid):
+  message=await client.get_messages(group_entity, ids=messid)
+  try:
+      if message.media:
+       if isinstance(message.media, MessageMediaDocument):
+         fname1=message.media.document.attributes[0].file_name
+         fname=preprocessName(fname1)
+         rep_date=message.date.date()
+         await client.download_media(message, file="/tmp/comp.pdf")
+         print("Sector file downloaded")
+         process_sector_file(fname,None,rep_date)
+  except Exception as e:
+       print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
+
+
 
 async def read_file_load():
     messids=[]
@@ -198,7 +214,9 @@ def beat_morning(param,id=""):
       loop.run_until_complete(read_new_messages(True,100))
   if param=="DOSOME":
      tel_old_200()
-     loop.run_until_complete(read_new_messages(False,100))
+     loop.run_until_complete(read_new_messages(False,50))
+  if param=="DIRECT":
+      loop.run_until_complete(handle_direct_upload(id))
  except Exception as e:
   print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
   return
@@ -207,5 +225,5 @@ def beat_morning(param,id=""):
       logger.error("lastid missing")
   else:
     write_first_line('./cntrfiles/ibeat.txt',str(lastid))
-  write_text_to_file(pdftext,"pdfanalysis")
+  analyze_recs.write_analyaze_records()
  

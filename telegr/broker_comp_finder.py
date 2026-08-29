@@ -18,7 +18,7 @@ def get_broker_and_company(fname,mtype):
  comp_ds={"company":"","broker":"","code":""}
  if mtype=="Others":
    mylist=extract_broker_and_company_other(fname)
-   print("From ***********get_broker_and_company",mylist)
+   print("From ***********get_broker_and_company list of words",mylist)
    get_correct_broker_and_nsecode_others(mylist,comp_ds)
    print("From ***********get_broker_and_company",comp_ds)
  else: 

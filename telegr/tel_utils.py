@@ -6,7 +6,6 @@ import re
 import ast
 import logging
 logger = logging.getLogger(__name__)
-
 def find_broker_from_fileName( fname):
     for key, value in controls.brokers.items():
         if  key.lower() in fname.lower():
@@ -131,28 +130,39 @@ def get_correct_broker_and_nsecode_others(mylist,dict_row):
 def extract_target_price_and_recomm(text):
     broker=""
     tp=extract_target_price(text)
+    print("TP is %s",tp)
     recomm=extract_recommendation(text)
+    print("Recomm is %s",recomm)
     return tp,recomm
 
    
 
 
 def extract_target_price(text):
+
  pattern = re.compile(
     r"""(?ix)
-    \b(?:TP|Target\s+Price)\b         # TP or Target Price
+    \b(?:TP|Target\s+Price)\b
     \s*
-    (?:to\s+)?                        # allow 'to'
+    (?:to\s+)?
+    (?:of\s+)?
+    \s*
     (?:[:\-–—]\s*)?
-    (?:of\s+)?                        # allow 'of'
-    (?:[:\-–—]\s*)?
-    (?:(Rs\.?|INR|₹))?\s*             # currency optional (allow attached)
-    ((?:\d{1,3}(?:,\s?\d{3})*|\d+))      # capture number with or without commas
+    (?:(?:Rs\.?|INR|₹)\s*)?
+    (
+        (?:
+            :\d{1,3}(?:\s*,\s*\d{3})+
+            |
+            \d+
+        )
+        (?:\.\d+)?
+    )
     """
- )
+)
  m = pattern.search(text)
+ print("M is  %s",m)
  if m:
-   return re.sub(r"[ ,]","",m.group(2))
+   return re.sub(r"[ ,]","",m.group(1))
  else:
    return ""
 
@@ -227,17 +237,16 @@ def clean_result_update_file(inputfile,brk):
 
 
 
-
-
 def write_dicts_to_file(data,filename):
     """Write a list of dictionaries to a JSON file."""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+
 def write_text_to_file(pdftext,filename):
     with open(filename, "r", encoding="utf-8") as f:
         content = f.read().strip()
         existing_list = ast.literal_eval(content) if content else []
-
+   
     # Append new list
     existing_list.extend(pdftext)
 
@@ -278,3 +287,37 @@ def upload_mega_file(fname):
            link="http://mydummyfile.com"
    return link
 
+class analyze_records:
+ filelist=None
+ def __init__(self,filename):
+  with open(filename, "r", encoding="utf-8") as f:
+   content = f.read().strip()
+   self.filelist = ast.literal_eval(content) if content else []
+
+
+ def is_present_in_analyze_text(self,report):
+    print(report)
+    report_clean = ''.join(report.split()).lower()
+    for i in self.filelist:
+      records=i["text"][:1000]
+      old_report_clean = ''.join(records.split()).lower()
+      print(old_report_clean)
+      smaller=old_report_clean #bug in min and max when lenghts are same 
+      larger=report_clean
+      if len(smaller) != len(larger):
+       smaller = min(report_clean, old_report_clean, key=len)
+       larger = max(report_clean, old_report_clean, key=len)
+      if smaller in larger:
+          print(smaller)
+          print("***************************************88")
+          print(larger)
+          return True,i["id"]
+    return False,None   
+ def add_to_analyze_list(self,record):
+    self.filelist.append(record)
+ def get_reports_to_be_analyzed(self):
+     return self.filelist
+ def write_analyaze_records(self):
+     write_text_to_file(self.filelist,"jikkatext")
+
+analyze_recs=analyze_records("jikkatext")
