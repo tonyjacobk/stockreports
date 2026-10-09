@@ -122,7 +122,7 @@ def parse_row(html_row):
             data["target"] = None
 
     except Exception as e:
-        logger.error (f"Error parsing below HTML row: {e}")
+        logger.error (f"BS Error parsing below HTML row: {e}")
         logger.info(html_row)
         return {} # Return empty dict on error
 
