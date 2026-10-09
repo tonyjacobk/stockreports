@@ -5,9 +5,9 @@ import contvar
 import logging
 logger = logging.getLogger(__name__)
 from .broker_comp_finder import get_broker_and_company
-from stockutils import check_in_dbcache,db,MegaMan,check_in_sector_cache
+from stockutils import check_in_dbcache,db,MegaMan,check_in_sector_cache,sb
 from .broker_specific import get_company_from_reports
-from .tel_utils import extract_target_price_and_recomm,find_broker_from_fileName,upload_mega_file,add_to_db,find_broker_from_text,analyze_recs
+from .tel_utils import extract_target_price_and_recomm,find_broker_from_fileName,upload_mega_file,add_to_db,find_broker_from_text,analyze_recs,is_unneeded_sector_report
 from .pdf_utils import extract_text_from_pdf
 
 def is_report_present(fileName,mtype):
@@ -24,6 +24,11 @@ def do_second_round_analysis(ds,u,fname,rep_date,reps,pdftext,messid):
  print("In second round analysis")
  text=extract_text_from_pdf('/tmp/comp.pdf',2000)
  print("Text extracted %s",text)
+ ret,val=is_unneeded_sector_report(text)
+ if ret:
+  logger.info("Mail:Unneeded Sector Report %s",val)
+  return -1,None
+
  tp,recomm=extract_target_price_and_recomm(text) 
  print("Target price , Recomm from do_second_round_analysis",tp,recomm)
  if u=="Others":
@@ -40,7 +45,7 @@ def do_second_round_analysis(ds,u,fname,rep_date,reps,pdftext,messid):
      case 2:
          if ds["company"]:
              fname=ds["company"]
-         process_sector_file(fname,ds["broker"],rep_date)
+         process_sector_file(fname,ds["broker"],rep_date,text,messid)
      case 3:
            create_analyze_data(rep_date,ds,fname,messid,tp,recomm,text,pdftext)
 
@@ -82,15 +87,25 @@ def classify_reports(ds,tp,recomm):
 
 
 
-def process_sector_file(fname,brk,date):
+def process_sector_file(fname,brk,date,text,messid):
+   print("Yarra")
    if check_in_sector_cache(fname):
        logger.info("Mail Sector file  already present %s",fname)
        return
+
+   ret,comp,sid=sb.text_exists_in_db(text[:2000],"sect")
+   print(ret,comp,sid,messid)
+   if ret:
+     logger.info("Mail Sector file  already present as  %s ,%s",fname,comp)
+     sb.replace_id(sid,messid)
+     return 
+   print("New Sector report",fname) 
    if not brk:
        brk=find_broker_from_fileName(fname)
+   print("Here")
    upload_sector_files(fname,brk,date)
-
-
+   sb.insert_report(tid=messid,publish_date=date.strftime("%Y-%m-%d"),company=fname,recommendation=None,target="",text=text[:2000],link=None,broker=brk,sector=True) 
+   sb.delete_logically_ids([messid])
 
 def upload_company_report_and_update_db(row,fname,reps):
   if {row['code'], row['broker']} in reps:
@@ -98,7 +113,6 @@ def upload_company_report_and_update_db(row,fname,reps):
       return 
   logger.info("Mail Data to be inserted into DB %s", row)
   link=upload_mega_file(fname)
- # link=" https://mega.co.nz/#!GMkHWJST!5fnYP4PCRucyvCnG4vc6cJ3k6jEDisvTfsZkDx7SlyM"
   row["link"]=link
   reps.append(row)
   add_to_db("comp",row)
@@ -110,17 +124,18 @@ def upload_sector_files(fname,broker,date):
     add_to_db("sect",row)
 
 def create_analyze_data(date,ds,fname,messid,tp,recomm,text,pdftext) :
-   global filelist
-   ret,val= analyze_recs.is_present_in_analyze_text(text[:1000])
-   if ret :
+   ret,val,p=sb.text_exists_in_db(text[:2000])
+   print("After supa",ret,val)
+   if ret:
      logger.info("Mail Record %s already present in Analyze records with id %s",messid,val)
      logger.info(text[:500])
-     return 
+     sb.replace_id(val,messid)
+     return
    link=upload_mega_file(fname)
    datestr=date.strftime("%Y-%m-%d")
-   append_text={"id":str(messid),"text":text,"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
+   append_text={"id":str(messid),"text":text[:2000],"link":link,"date":datestr,'recommendation':recomm,'target_price':tp,'broker':ds["broker"]}
    logger.info("Need further analysis %s :",append_text)
    try:
-    analyze_recs.add_to_analyze_list(append_text)
+       sb.insert_report(tid=messid,publish_date=date.strftime("%Y-%m-%d"),company=None,recommendation=recomm,target=tp,text=text[:2000],link=link,broker=ds["broker"])
    except Exception as e:
        print(str(e))

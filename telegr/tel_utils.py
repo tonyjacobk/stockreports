@@ -1,5 +1,5 @@
 from cntrfiles import controls
-from stockutils import get_comp_code,db,MegaMan
+from stockutils import get_comp_code,db,MegaMan,sb
 import json
 import contvar
 import re
@@ -151,7 +151,7 @@ def extract_target_price(text):
     (?:(?:Rs\.?|INR|₹)\s*)?
     (
         (?:
-            :\d{1,3}(?:\s*,\s*\d{3})+
+            \d{1,3}(?:\s*,\s*\d{3})+
             |
             \d+
         )
@@ -243,23 +243,22 @@ def write_dicts_to_file(data,filename):
         json.dump(data, f, indent=4)
 
 def write_text_to_file(pdftext,filename):
-    with open(filename, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-        existing_list = ast.literal_eval(content) if content else []
-   
-    # Append new list
-    existing_list.extend(pdftext)
 
     # Save back to file
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(repr(existing_list))
+        f.write(repr(pdftext))
 
 def read_dicts_from_file(filename):
     """Read a list of dictionaries from a JSON file."""
     with open(filename, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
+def is_unneeded_sector_report(report_text):
+ texts=["Our Morning Mantra is released before the opening bell"]
+ for t in texts:
+    if t in report_text:
+       return True, t   
+ return False, None       
 
 
 
@@ -290,11 +289,13 @@ def upload_mega_file(fname):
 class analyze_records:
  filelist=None
  def __init__(self,filename):
+  """
   with open(filename, "r", encoding="utf-8") as f:
    content = f.read().strip()
    self.filelist = ast.literal_eval(content) if content else []
-
-
+  """
+  self.filelist=sb.get_active_recommendations()
+  
  def is_present_in_analyze_text(self,report):
     print(report)
     report_clean = ''.join(report.split()).lower()

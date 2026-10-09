@@ -9,6 +9,7 @@ from datetime import date, timedelta,datetime
 logger = logging.getLogger(__name__)
 from .tel_utils import is_direct_broker,preprocessName, write_text_to_file,analyze_recs
 from stockutils import read_first_line,write_first_line,get_last_ndays_data
+from .pdf_utils import extract_text_from_pdf
 api_id = '17206937'
 api_hash = 'ab2de3d291b1f6317bb422cd23bf1712'
 
@@ -35,7 +36,7 @@ DONT_CARE = [
     "dbs bank", "kotak neo", "investment outlook", "banca", "amundi", "allianz",
     "adb ", "boj ", "banque ", "binance ", "stablecoin", "ddw", "global outlook",
     "oecd ", "imf ", "blockchain", "bridgewise", "socgen", "barclays", "zurich",
-    "deutsche bank", "coinbase", "macro", "bcg ", "boe ", "boston", "wharton",
+    "deutsche bank", "coinbase", "macro", "bcg ", "boe ", "boston", "wharton","deloitte",
     "payments infrastructure","channel check","isda","bank of england","gsx","bca","gs brian garrett","ajzal","bis","hedge fund","black rock","ifc","mufg","merics","wisdom tree","wisdomtree","newyork life","new york life","blackrock","capco","bundesbank","harvard"
 ]
 
@@ -119,8 +120,13 @@ async def handle_single_message(message,tc):
           await handle_single_company_broker_report(message,fname,u,reps,rep_date)
          if u=="sector" or u=="thematic":
           await client.download_media(message, file="/tmp/comp.pdf")
+          text=extract_text_from_pdf('/tmp/comp.pdf',2000)
           print("Sector file downloaded")
-          process_sector_file(fname,None,rep_date)
+          print(fname,rep_date)
+          try:
+           process_sector_file(fname,None,rep_date,text,message.id)
+          except Exception as e:
+              print(str(e))
          return tc 
       return tc
   except Exception as e:
@@ -184,7 +190,7 @@ async def handle_direct_upload(messid):
          rep_date=message.date.date()
          await client.download_media(message, file="/tmp/comp.pdf")
          print("Sector file downloaded")
-         process_sector_file(fname,None,rep_date)
+         process_sector_file(fname,None,rep_date,messid)
   except Exception as e:
        print(f"Unexpected error: {type(e).__name__}: {e} - Skipping this message")
 
@@ -214,7 +220,7 @@ def beat_morning(param,id=""):
       loop.run_until_complete(read_new_messages(True,100))
   if param=="DOSOME":
      tel_old_200()
-     loop.run_until_complete(read_new_messages(False,50))
+     loop.run_until_complete(read_new_messages(False,20))
   if param=="DIRECT":
       loop.run_until_complete(handle_direct_upload(id))
  except Exception as e:
