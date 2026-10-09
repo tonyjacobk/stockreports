@@ -2,13 +2,18 @@ import requests
 import urllib.parse
 import json
 import re
+import os
+from dotenv import load_dotenv
+
 from urllib.parse import urlparse,parse_qs
 import logging
 logger = logging.getLogger(__name__)
+load_dotenv()
+
 
 myURL="https://smifs.com/api/result-updates?pagination%5Bpage%5D=1&pagination%5BpageSize%5D=6&sort=publish_date%3Adesc&populate=*"
 last_scrape_tool=0
-timOut=6
+timOut=30
 
 def write_to_file(report_list,fname):
   with open(fname, "w") as file:
@@ -60,11 +65,11 @@ def make_request(messType,url,headers,payload,fName):
  retval=None
  try:
     if messType=="post": 
-      response = requests.post(url, json=payload,headers=headers,timeout= timOut)
+      response = requests.post(url, json=payload,headers=headers,timeout= (6,timOut))
       print(response.text,"Response")
     else:
       print(url,payload,"from make_req")
-      response =requests.get(url,params=payload,timeout=timOut)
+      response =requests.get(url,params=payload,timeout=(6,timOut))
       print(response.text,"Response")
     response.raise_for_status()
     if response.status_code==204 or not response.content:
@@ -95,7 +100,7 @@ def make_request(messType,url,headers,payload,fName):
 
 def scrape_do(getUrl,fName):
  print("Hi Here")
- token = "6b3c2837d0f641f7aa93a3eeb331765e272e285d98b"
+ token = os.getenv('key_scrape_do').strip()
  targetUrl = urllib.parse.quote(getUrl)
  url = "http://api.scrape.do/?token={}&url={}".format(token, targetUrl)
  print("Scrape_do URL",url)
@@ -108,7 +113,7 @@ def fire_crawl(myURL,fname):
     api_url = "https://api.firecrawl.dev/v2/scrape"
 
     headers = {
-        "Authorization": "Bearer fc-e11e9da53afe400aa9c0e334101b788a",
+        "Authorization": os.getenv('key_fire_crawl').strip(),
         "Content-Type": "application/json"
     }
 
@@ -126,7 +131,7 @@ def fire_crawl(myURL,fname):
 def scrapefly(myURL,fName):
     url = "https://api.scrapfly.io/scrape"
     params = {
-        "key": "scp-live-77c6a38ac2ea439e91e22f8f2d66ab93",
+        "key": os.getenv('key_scrapefly').strip(),
         "url": myURL,
         "render_js": "true",
         "asp": "true"
@@ -148,7 +153,7 @@ def decodo(myURL,fName):
  headers = {
     "accept": "application/json",
     "content-type": "application/json",
-    "authorization": "Basic VTAwMDA0OTA5ODA6UFdfMTZhNDNlYWI0YWM3MzBiNDE5ZDMzMjRmZTk2ODg2N2Q1"
+    "authorization":os.getenv('key_decodo').strip()
 }
  response=make_request("post",url,headers,payload,fName)
  return response
