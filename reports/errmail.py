@@ -1,8 +1,8 @@
 def find_error_context(file_path, target_word="error"):
     context_lines = []
     skip_above_patterns = [
-        "INFO - IBS Report date from first row start_date",
-        "INFO - IMail: BS Searching for reports newer than"
+        "INFO - BS Report date from first row start_date",
+        "INFO - Mail: BS Searching for reports newer than"
     ]
     skip_error_pattern = "Error parsing below HTML row: 'NoneType' object has no attribute 'find'"
 
