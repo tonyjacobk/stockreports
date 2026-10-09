@@ -1,12 +1,16 @@
 import requests
 import json
 import contvar
+import os
+from dotenv import load_dotenv
 import logging
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+
 url='https://www.business-standard.com/markets/research-report'
 username = 'tonyjacobk'
-apiKey = 'cu6SYxYgWZuDc5hDUnTVWSyER'
+apiKey =os.getenv("key_scrapingbot").strip()
 
 apiUrl = "http://api.scraping-bot.io/scrape/raw-html"
 options = {
@@ -32,7 +36,7 @@ def scrape_bs_bot():
  return 1
 
 def get_text():
- payload = { 'api_key': '6938d6ac1f3a7748cc6a6564692cfbdf', 'url': 'https://www.business-standard.com/markets/research-report' }
+ payload = { 'api_key': os.getenv('key_scraperapi').strip(), 'url': 'https://www.business-standard.com/markets/research-report' }
  response = requests.get('https://api.scraperapi.com/', params=payload)
  print("Scraperapi.com is being tried")
  logger.info("Scraperapi.com is being tried")
@@ -45,11 +49,13 @@ def get_text():
  return 1
 
 def get_zyte():
+ zyte_url="http://"+os.getenv('key_zyte').strip()+":@api.zyte.com:8011/"
+ print(zyte_url)
  response = requests.get(
     "https://www.business-standard.com/markets/research-report",
     verify=False,
     proxies={
-        scheme: "http://1de3b8853df843eeb49b86d5b2e0e198:@api.zyte.com:8011/" for scheme in ("http", "https")
+        scheme: zyte_url for scheme in ("http", "https")
     },
 )
  if response.status_code !=200:
@@ -75,3 +81,5 @@ def scrape_bs():
      return 1
  logger.error(" Mail Error Could not Scrape BS site ")
  return -1
+
+
