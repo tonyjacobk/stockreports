@@ -232,17 +232,22 @@ def find_company(raw_name_i):
  print(val,"After Misc",val)
  if val:
      return 0,val
- else:
-   ret,val=combine_single_letter_and_check(raw_name)
-   print ("After combine_single_letters",ret,val)
-   if ret==0:
-    return ret,val
-   else:
-    ret,val=check_for_name_with_special_char(raw_name_i)
-    print("After check_for_name_with_special_char", ret,val)
-    if ret==0:
+ print("Before And",raw_name)
+ if " and " in raw_name.lower():  # some times And may not be saved in company Name in DB 
+     new_name=raw_name.lower().replace(' and ',' ')
+     ret,val=find_company_easy(new_name)
+     if ret==0:
+         return ret,val
+
+ ret,val=combine_single_letter_and_check(raw_name)
+ print ("After combine_single_letters",ret,val)
+ if ret==0:
+   return ret,val
+ ret,val=check_for_name_with_special_char(raw_name_i)
+ print("After check_for_name_with_special_char", ret,val)
+ if ret==0:
         return ret,val
-    else:
+ else:
      return -1,[]
   
 def check_for_name_with_special_char(raw_name):
