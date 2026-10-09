@@ -25,7 +25,7 @@ def get_dolat_page_soup(dolurl) -> BeautifulSoup:
 
 
 
-def extract_new_reports(soup: BeautifulSoup, lastdate: datetime) -> list[dict]:
+def extract_new_reports(soup: BeautifulSoup, lastdate: datetime,durl:str) -> list[dict]:
     rows = []
     # Try the requested table first
     table = soup.find("table", id="ctl00_ContentPlaceHolder1_GridView4")
@@ -63,7 +63,7 @@ def extract_new_reports(soup: BeautifulSoup, lastdate: datetime) -> list[dict]:
         return rows    
     else:
         # FALLBACK: current page structure (text date + link to PDF)
-        logger.error("Mail: Table ctl00_ContentPlaceHolder1_GridView4 not found → using fallback parsing")
+        logger.error("Mail: Table ctl00_ContentPlaceHolder1_GridView4 not found → using fallback parsing  %s",durl)
         
         # Find all <a> tags pointing to PDFs in /Attachment/
         for a in soup.find_all("a", href=True):
@@ -116,7 +116,7 @@ def extract_new_reports(soup: BeautifulSoup, lastdate: datetime) -> list[dict]:
 def get_reports_from_page(id_do,last_checked):
     durl="https://www.dolatresearch.com/report_sector.aspx?id="+str(id_do)
     bf1 = get_dolat_page_soup(durl)
-    new_reports = extract_new_reports(bf1, last_checked)
+    new_reports = extract_new_reports(bf1, last_checked,durl)
     logger.info("Found %s reports from id %s",len(new_reports),id_do)   
     return(new_reports)
 def dolat_main(last_checked):
