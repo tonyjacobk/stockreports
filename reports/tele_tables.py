@@ -112,6 +112,7 @@ def get_analysis_report(log_file="/tmp/telg.log"):
     dup_sec=0
     dup_analyze=0
     comprep=0
+    useless_sector_reports=0
     huge_lines = []
    
     with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -132,10 +133,12 @@ def get_analysis_report(log_file="/tmp/telg.log"):
                 dup_sec += 1
             if "already present in Analyze records with id" in line:
                 dup_analyze += 1
+            if "Mail:Unneeded Sector Report" in line:
+                useless_sector_reports += 1
             if "File too huge .." in line:
                 toohuge += 1
                 huge_lines.append(line.strip())
-    accounted=comprep+duplicate+analysis+sector+dup_sec+dup_analyze
+    accounted=comprep+duplicate+analysis+sector+dup_sec+dup_analyze+useless_sector_reports+toohuge
     # -------- Table 1: Huge lines --------
     huge_table = """
     <table border="1" cellpadding="5" cellspacing="0">
@@ -171,6 +174,11 @@ def get_analysis_report(log_file="/tmp/telg.log"):
             <td>Analysis</td>
             <td>{analysis}</td>
         </tr>
+        <tr>
+            <td>Unimportant Sector Report</td>
+            <td>{useless_sector_reports}</td>
+        </tr>
+
         <tr>
             <td>Duplicate Company Report</td>
             <td>{duplicate}</td>
